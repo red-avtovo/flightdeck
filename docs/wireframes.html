@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flightdeck — UI Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:         #080B13;
+    --bg-grid:    url("data:image/svg+xml,%3Csvg width='32' height='32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 32 0 L 0 0 0 32' fill='none' stroke='%23ffffff05' stroke-width='1'/%3E%3C/svg%3E");
+    --surf:       #0F1420;
+    --surf-hi:    #141B2D;
+    --surf-focus: #1A2340;
+    --border:     #1E2A40;
+    --border-hi:  #2A3A54;
+
+    --indigo:     #6366F1;
+    --indigo-dim: #4338CA;
+    --indigo-glow:rgba(99,102,241,.18);
+
+    --emerald:    #10B981;
+    --sky:        #0EA5E9;
+    --amber:      #F59E0B;
+    --rose:       #F43F5E;
+
+    --txt:        #E2E8F0;
+    --txt-sub:    #94A3B8;
+    --txt-muted:  #475569;
+    --txt-dim:    #334155;
+
+    --font-sans:  'Inter', system-ui, sans-serif;
+    --font-mono:  'JetBrains Mono', monospace;
+
+    --radius:     6px;
+    --radius-lg:  10px;
+  }
+
+  html { font-family: var(--font-sans); font-size: 13px; background: #040609; color: var(--txt); }
+  body { padding: 40px 32px; }
+
+  /* ── Page nav ── */
+  .page-nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    background: #040609ee; backdrop-filter: blur(10px);
+    padding: 10px 0 14px; margin-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .page-nav a {
+    padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 500;
+    color: var(--txt-sub); text-decoration: none; border: 1px solid var(--border);
+    transition: all .15s;
+  }
+  .page-nav a:hover, .page-nav a.active {
+    background: var(--indigo); color: #fff; border-color: var(--indigo);
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-header h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--txt-muted);
+  }
+  .section-header .route {
+    font-family: var(--font-mono); font-size: 11px; color: var(--indigo); opacity: .8;
+  }
+
+  /* ── Frame container ── */
+  .frame {
+    background: var(--bg);
+    background-image: var(--bg-grid);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 56px;
+    display: flex;
+    box-shadow: 0 24px 64px #00000080;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 220px; min-width: 220px; background: var(--surf); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 20px 0;
+    position: relative;
+  }
+  .sidebar-logo {
+    display: flex; align-items: center; gap: 8px; padding: 0 16px 20px;
+    border-bottom: 1px solid var(--border); margin-bottom: 16px;
+  }
+  .sidebar-logo .icon {
+    width: 28px; height: 28px; background: var(--indigo); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: #fff; font-family: var(--font-mono);
+  }
+  .sidebar-logo .wordmark { font-size: 14px; font-weight: 700; color: var(--txt); letter-spacing: -.02em; }
+  .sidebar-logo .org { font-size: 11px; color: var(--txt-muted); font-weight: 400; }
+
+  .nav-group-label {
+    font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--txt-dim); padding: 6px 16px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px; padding: 7px 16px;
+    border-radius: 0; font-size: 12px; font-weight: 500; color: var(--txt-sub);
+    cursor: pointer; transition: all .1s; border-left: 2px solid transparent;
+  }
+  .nav-item.active {
+    color: var(--txt); background: var(--surf-hi); border-left-color: var(--indigo);
+  }
+  .nav-item:hover:not(.active) { color: var(--txt); background: var(--surf-hi); }
+  .nav-item .nav-icon { width: 14px; text-align: center; opacity: .7; font-size: 12px; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .nav-item .badge {
+    margin-left: auto; background: var(--rose); color: #fff; font-size: 9px;
+    font-weight: 700; padding: 1px 5px; border-radius: 99px; font-family: var(--font-mono);
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 12px 16px 0; border-top: 1px solid var(--border);
+  }
+  .avatar-row { display: flex; align-items: center; gap: 8px; }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--indigo-dim);
+    display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff;
+  }
+  .avatar-name { font-size: 11px; color: var(--txt-sub); }
+
+  /* ── Main area ── */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  /* ── TopBar ── */
+  .topbar {
+    display: flex; align-items: center; padding: 0 20px; height: 52px; min-height: 52px;
+    border-bottom: 1px solid var(--border); gap: 12px;
+  }
+  .topbar-title { font-size: 14px; font-weight: 700; color: var(--txt); margin-right: auto; }
+  .topbar-sub { font-size: 11px; color: var(--txt-muted); }
+
+  .filter-pill {
+    display: flex; align-items: center; gap: 5px; padding: 4px 10px;
+    background: var(--surf-hi); border: 1px solid var(--border-hi); border-radius: 99px;
+    font-size: 11px; color: var(--txt-sub); cursor: pointer; white-space: nowrap;
+  }
+  .filter-pill .label { color: var(--txt-muted); font-size: 10px; }
+  .filter-pill .val { color: var(--txt); font-weight: 500; }
+  .filter-pill:hover { border-color: var(--indigo); }
+
+  /* ── Page body ── */
+  .page-body { flex: 1; padding: 20px 20px 28px; overflow: auto; }
+
+  /* ── KPI row ── */
+  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi-row.four { grid-template-columns: repeat(4, 1fr); }
+  .kpi-row.three { grid-template-columns: repeat(3, 1fr); }
+
+  .kpi-card {
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; display: flex; flex-direction: column; gap: 2px;
+    transition: border-color .15s;
+  }
+  .kpi-card:hover { border-color: var(--border-hi); }
+  .kpi-label { font-size: 10px; font-weight: 500; color: var(--txt-muted); letter-spacing: .04em; text-transform: uppercase; }
+  .kpi-value {
+    font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+    color: var(--txt); letter-spacing: -.03em; line-height: 1.1; margin-top: 4px;
+  }
+  .kpi-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .kpi-trend { font-size: 10px; font-weight: 600; font-family: var(--font-mono); }
+  .kpi-trend.up { color: var(--emerald); }
+  .kpi-trend.down { color: var(--rose); }
+  .kpi-period { font-size: 10px; color: var(--txt-dim); }
+  .sparkline { flex: 1; height: 24px; display: flex; align-items: flex-end; gap: 1px; margin-left: 4px; }
+  .sparkline span {
+    flex: 1; background: var(--indigo); opacity: .5; border-radius: 1px 1px 0 0;
+    min-height: 3px;
+  }
+  .sparkline span:last-child { opacity: .9; }
+
+  /* ── Autonomy Bar ── */
+  .autonomy-hero {
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 16px;
+  }
+  .autonomy-hero-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+  }
+  .autonomy-hero-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--txt-muted);
+  }
+  .autonomy-hero-subtitle { font-size: 11px; color: var(--txt-dim); }
+
+  .autonomy-legend { display: flex; gap: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .legend-label { font-size: 10px; color: var(--txt-sub); }
+  .legend-pct { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--txt); }
+
+  .autonomy-bar-track {
+    height: 28px; border-radius: 4px; overflow: hidden; display: flex;
+    box-shadow: 0 0 0 1px var(--border);
+  }
+  .ab-seg {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: rgba(255,255,255,.9);
+    transition: filter .2s; cursor: pointer; position: relative; overflow: hidden;
+  }
+  .ab-seg:hover { filter: brightness(1.15); }
+  .ab-seg::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, transparent 60%);
+  }
+  .ab-autonomous  { background: var(--emerald); box-shadow: inset 0 0 20px rgba(16,185,129,.3); }
+  .ab-assisted    { background: var(--sky);     box-shadow: inset 0 0 20px rgba(14,165,233,.3); }
+  .ab-rescued     { background: var(--amber);   box-shadow: inset 0 0 20px rgba(245,158,11,.3); }
+  .ab-failed      { background: var(--rose);    box-shadow: inset 0 0 20px rgba(244,63,94,.3); }
+
+  .autonomy-ticks { display: flex; margin-top: 5px; }
+  .autonomy-tick  { font-size: 10px; color: var(--txt-dim); font-family: var(--font-mono); }
+
+  /* ── Chart grid ── */
+  .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .chart-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-row.full  { grid-template-columns: 1fr; }
+
+  .chart-card {
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px; display: flex; flex-direction: column;
+  }
+  .chart-title { font-size: 11px; font-weight: 600; color: var(--txt-sub); margin-bottom: 10px; }
+  .chart-title span { font-size: 10px; color: var(--txt-dim); font-weight: 400; margin-left: 6px; }
+  .chart-area { flex: 1; background: var(--surf-hi); border-radius: 4px; min-height: 140px; position: relative; overflow: hidden; }
+
+  /* Chart visual placeholders — actual chart graphics */
+  .chart-lines {
+    position: absolute; inset: 8px; display: flex; align-items: flex-end; gap: 3px;
+  }
+  .chart-bar {
+    flex: 1; border-radius: 2px 2px 0 0; opacity: .75;
+    transition: opacity .2s;
+  }
+  .chart-bar:hover { opacity: 1; }
+
+  .chart-area-stacked {
+    position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 8px;
+  }
+
+  /* Line chart SVG placeholder */
+  .line-chart-svg { width: 100%; height: 100%; }
+
+  /* Budget gauge */
+  .gauge-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 10px; }
+  .gauge-arc { position: relative; width: 130px; height: 75px; overflow: hidden; }
+  .gauge-track {
+    position: absolute; inset: 0; border-radius: 150px 150px 0 0; overflow: hidden;
+    background: var(--surf-focus);
+    box-shadow: inset 0 0 0 18px var(--surf);
+  }
+  .gauge-fill {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 200%;
+    background: conic-gradient(from 180deg, var(--emerald) 0deg, var(--emerald) 56deg, transparent 56deg);
+    transform-origin: 50% 100%;
+  }
+  .gauge-center {
+    position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--emerald);
+  }
+  .gauge-label { font-size: 10px; color: var(--txt-muted); margin-top: 6px; text-align: center; }
+
+  /* Scatter plot placeholder */
+  .scatter-wrap { position: relative; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .scatter-dot {
+    position: absolute; border-radius: 50%; background: var(--indigo);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: rgba(255,255,255,.8); font-weight: 600;
+    cursor: pointer;
+  }
+  .scatter-axis-x {
+    position: absolute; bottom: 8px; left: 0; right: 0;
+    font-size: 9px; color: var(--txt-dim); text-align: center; font-style: italic;
+  }
+  .scatter-axis-y {
+    position: absolute; left: 6px; top: 0; bottom: 20px;
+    font-size: 9px; color: var(--txt-dim); writing-mode: vertical-rl; text-align: center;
+    transform: rotate(180deg); font-style: italic;
+  }
+
+  /* Horizontal bar chart */
+  .hbar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .hbar-label { font-size: 10px; color: var(--txt-sub); width: 90px; text-align: right; flex-shrink: 0; font-family: var(--font-mono); }
+  .hbar-track { flex: 1; height: 16px; background: var(--surf-focus); border-radius: 2px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 2px; display: flex; align-items: center; padding-right: 6px; justify-content: flex-end; }
+  .hbar-val { font-size: 10px; color: rgba(255,255,255,.8); font-family: var(--font-mono); font-weight: 600; }
+
+  /* ── Table ── */
+  .data-table {
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; margin-bottom: 16px;
+  }
+  .data-table table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left; font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--txt-muted); padding: 8px 12px; border-bottom: 1px solid var(--border);
+    background: var(--surf-hi); white-space: nowrap; cursor: pointer;
+  }
+  .data-table th:hover { color: var(--txt); }
+  .data-table th .sort { margin-left: 3px; opacity: .5; }
+  .data-table td {
+    padding: 8px 12px; font-size: 11px; color: var(--txt-sub); border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surf-hi); color: var(--txt); }
+  .data-table td .mono { font-family: var(--font-mono); color: var(--txt); font-size: 11px; }
+  .data-table td .dim { color: var(--txt-dim); }
+
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between; padding: 10px 12px 0;
+    margin-bottom: 0;
+  }
+  .table-header .ttl { font-size: 11px; font-weight: 600; color: var(--txt-sub); }
+
+  /* ── Alerts strip ── */
+  .alerts-strip {
+    background: rgba(244,63,94,.08); border: 1px solid rgba(244,63,94,.25);
+    border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .alert-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--rose); flex-shrink: 0; }
+  .alert-text { font-size: 11px; color: var(--txt-sub); flex: 1; }
+  .alert-text strong { color: var(--rose); }
+  .alert-cta {
+    font-size: 11px; color: var(--indigo); font-weight: 500; cursor: pointer;
+    white-space: nowrap;
+  }
+  .alert-dismiss { color: var(--txt-dim); cursor: pointer; font-size: 14px; padding: 0 4px; }
+
+  /* ── Status badge ── */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 7px; border-radius: 99px; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+  }
+  .badge-completed  { background: rgba(16,185,129,.15); color: var(--emerald); }
+  .badge-failed     { background: rgba(244,63,94,.15);  color: var(--rose); }
+  .badge-running    { background: rgba(99,102,241,.15); color: var(--indigo); }
+  .badge-blocked    { background: rgba(245,158,11,.15); color: var(--amber); }
+  .badge-critical   { background: rgba(244,63,94,.15);  color: var(--rose); }
+  .badge-warning    { background: rgba(245,158,11,.15); color: var(--amber); }
+  .badge-info       { background: rgba(14,165,233,.15); color: var(--sky); }
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* ── Span drawer ── */
+  .drawer-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 50; display: flex; justify-content: flex-end;
+  }
+  .drawer {
+    width: 380px; background: var(--surf); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; height: 100%;
+  }
+  .drawer-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .drawer-title { font-size: 12px; font-weight: 600; color: var(--txt); }
+  .drawer-sub { font-size: 10px; color: var(--txt-muted); margin-top: 2px; font-family: var(--font-mono); }
+  .drawer-close { color: var(--txt-dim); cursor: pointer; font-size: 16px; }
+  .drawer-body { flex: 1; overflow: auto; padding: 10px; }
+  .span-row {
+    display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+    border-radius: 4px; margin-bottom: 2px; border: 1px solid transparent;
+  }
+  .span-row:hover { background: var(--surf-hi); border-color: var(--border); }
+  .span-row.error { background: rgba(244,63,94,.07); border-color: rgba(244,63,94,.2); }
+  .span-icon { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .span-info { flex: 1; }
+  .span-name { font-size: 11px; color: var(--txt); font-weight: 500; }
+  .span-type { font-size: 9px; color: var(--txt-dim); text-transform: uppercase; letter-spacing: .06em; }
+  .span-dur { font-family: var(--font-mono); font-size: 10px; color: var(--txt-muted); }
+  .span-status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Readiness strip ── */
+  .readiness-strip {
+    display: flex; gap: 10px; margin-bottom: 16px;
+  }
+  .readiness-badge {
+    display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+    font-size: 11px;
+  }
+  .readiness-badge.pass { border-color: rgba(16,185,129,.3); }
+  .readiness-badge.fail { border-color: rgba(244,63,94,.3); }
+  .readiness-badge .icon { font-size: 13px; }
+  .readiness-badge .text { color: var(--txt-sub); }
+  .readiness-badge.pass .icon-val { color: var(--emerald); }
+  .readiness-badge.fail .icon-val { color: var(--rose); }
+
+  /* ── Mini section ── */
+  .mini-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .mini-section {
+    background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px;
+  }
+  .mini-section-title {
+    font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--txt-muted); margin-bottom: 10px;
+  }
+  .mini-metric-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .mini-metric-label { font-size: 10px; color: var(--txt-sub); }
+  .mini-metric-val { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--txt); }
+  .mini-link { font-size: 10px; color: var(--indigo); cursor: pointer; }
+
+  /* ── Members table ── */
+  .member-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .member-row:last-child { border-bottom: none; }
+  .member-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .member-name { font-size: 11px; color: var(--txt); font-weight: 500; flex: 1; }
+  .member-stat { font-family: var(--font-mono); font-size: 10px; color: var(--txt-muted); margin-left: 12px; }
+
+  /* ── Login page ── */
+  .login-frame {
+    min-height: 480px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); background-image: var(--bg-grid);
+  }
+  .login-card {
+    background: var(--surf); border: 1px solid var(--border); border-radius: 12px;
+    padding: 36px 32px; width: 340px;
+  }
+  .login-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+  .login-logo { width: 36px; height: 36px; background: var(--indigo); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+  .login-wordmark { font-size: 18px; font-weight: 800; color: var(--txt); letter-spacing: -.04em; }
+  .login-org-name { font-size: 11px; color: var(--txt-muted); margin-top: 1px; }
+  .login-heading { font-size: 20px; font-weight: 700; color: var(--txt); margin-bottom: 6px; letter-spacing: -.03em; }
+  .login-sub { font-size: 12px; color: var(--txt-muted); margin-bottom: 22px; }
+  .login-label { font-size: 11px; color: var(--txt-sub); font-weight: 500; margin-bottom: 4px; }
+  .login-input {
+    width: 100%; background: var(--surf-hi); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; color: var(--txt); outline: none; margin-bottom: 16px;
+    font-family: var(--font-sans);
+  }
+  .login-input::placeholder { color: var(--txt-dim); }
+  .okta-btn {
+    width: 100%; padding: 9px; border-radius: 6px; border: none; cursor: pointer;
+    font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: #007DC1; color: #fff; font-family: var(--font-sans);
+  }
+  .okta-logo { font-size: 15px; font-weight: 800; letter-spacing: -.05em; }
+  .login-footnote { font-size: 10px; color: var(--txt-dim); text-align: center; margin-top: 16px; }
+
+  /* ── Page heading row ── */
+  .page-heading { margin-bottom: 14px; }
+  .page-heading h1 { font-size: 18px; font-weight: 800; color: var(--txt); letter-spacing: -.04em; }
+  .page-heading p { font-size: 11px; color: var(--txt-muted); margin-top: 2px; }
+
+  /* ── Watermark / annotation ── */
+  .annot {
+    font-size: 10px; color: var(--indigo); background: rgba(99,102,241,.08);
+    border: 1px dashed rgba(99,102,241,.3); border-radius: 4px;
+    padding: 3px 8px; display: inline-block; margin-top: 4px;
+  }
+
+  /* ── Frame label ── */
+  .frame-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--txt-dim); margin-bottom: 8px; padding-left: 4px;
+  }
+
+  /* Utility */
+  .gap-sm { gap: 6px; }
+  .mt-sm { margin-top: 8px; }
+  .w-full { width: 100%; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-2 { gap: 8px; }
+
+  /* ── Section separators ── */
+  .wf-title {
+    font-size: 28px; font-weight: 800; color: var(--txt); letter-spacing: -.05em;
+    margin-bottom: 6px;
+  }
+  .wf-title span { color: var(--indigo); }
+  .wf-subtitle { font-size: 13px; color: var(--txt-muted); margin-bottom: 40px; }
+
+  /* ── Chart helpers ── */
+  .area-layers { position: absolute; inset: 0; }
+  .ml-auto { margin-left: auto; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <a href="#login" class="active">Login</a>
+  <a href="#overview">Overview</a>
+  <a href="#outcomes">Outcomes</a>
+  <a href="#cost">Cost</a>
+  <a href="#reliability">Reliability</a>
+  <a href="#governance">Governance</a>
+  <a href="#team">Team Drill-down</a>
+  <a href="#repo">Repo Drill-down</a>
+</nav>
+
+<h1 class="wf-title">Flightdeck — <span>UI Wireframes</span></h1>
+<p class="wf-subtitle">Org-Level AI Coding Agent Analytics Portal &mdash; all 8 views, annotated</p>
+
+<!-- ════════════════════════════════════════════════════ LOGIN ══ -->
+<div id="login">
+  <div class="section-header">
+    <h2>01 · Login</h2>
+    <span class="route">/login</span>
+  </div>
+  <p class="frame-label">Mock Okta SSO — public route</p>
+  <div class="frame" style="height:480px;">
+    <div class="login-frame" style="flex:1;">
+      <div class="login-card">
+        <div class="login-logo-row">
+          <div class="login-logo">F</div>
+          <div>
+            <div class="login-wordmark">Flightdeck</div>
+            <div class="login-org-name">Acme Corp · Engineering</div>
+          </div>
+        </div>
+        <div class="login-heading">Sign in to your org</div>
+        <div class="login-sub">Use your company Okta credentials</div>
+        <div class="login-label">Work email</div>
+        <input class="login-input" placeholder="you@acme.com" type="email">
+        <button class="okta-btn">
+          <span class="okta-logo">okta</span>
+          Continue with Okta
+        </button>
+        <div class="login-footnote">Session is scoped to this tab. No credentials stored.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ OVERVIEW ══ -->
+<div id="overview">
+  <div class="section-header">
+    <h2>02 · Overview</h2>
+    <span class="route">/overview</span>
+  </div>
+  <p class="frame-label">Primary question: Are agents delivering value org-wide right now?</p>
+  <div class="frame" style="min-height:740px;">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div>
+          <div class="wordmark">Flightdeck</div>
+          <div class="org">Acme Corp</div>
+        </div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item active">
+        <span class="nav-icon">◈</span> Overview
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">✓</span> Outcomes
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">$</span> Cost
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">⏱</span> Reliability
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">🔒</span> Governance
+        <span class="badge">3</span>
+      </div>
+      <div class="nav-group-label" style="margin-top:8px;">Teams</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Platform</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Product</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Data Science</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Mobile</div>
+      <div class="sidebar-footer">
+        <div class="avatar-row">
+          <div class="avatar">JD</div>
+          <div class="avatar-name">Jane Doe · VP Eng</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Overview</div>
+        <div class="topbar-sub">Org-wide · all teams</div>
+        <div class="filter-pill">
+          <span class="label">Period</span>
+          <span class="val">30d ▾</span>
+        </div>
+        <div class="filter-pill">
+          <span class="label">Team</span>
+          <span class="val">All ▾</span>
+        </div>
+        <div class="filter-pill">
+          <span class="label">Model</span>
+          <span class="val">All ▾</span>
+        </div>
+      </div>
+
+      <div class="page-body">
+        <!-- Alerts strip -->
+        <div class="alerts-strip">
+          <div class="alert-dot"></div>
+          <div class="alert-text">
+            <strong>3 active alerts</strong> — 1 critical cost spike on day 60, 2 policy blocks in the last 24h.
+          </div>
+          <div class="alert-cta">View in Governance →</div>
+          <div class="alert-dismiss">✕</div>
+        </div>
+
+        <!-- Autonomy Hero -->
+        <div class="autonomy-hero">
+          <div class="autonomy-hero-header">
+            <div>
+              <div class="autonomy-hero-label">Agent Autonomy Breakdown</div>
+              <div class="autonomy-hero-subtitle">Terminal tasks only (completed / failed / cancelled) · 1,142 tasks</div>
+            </div>
+            <div class="autonomy-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div><span class="legend-label">Autonomous</span>&nbsp;<span class="legend-pct">41%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--sky)"></div><span class="legend-label">Assisted</span>&nbsp;<span class="legend-pct">30%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-label">Rescued</span>&nbsp;<span class="legend-pct">17%</span></div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--rose)"></div><span class="legend-label">Failed</span>&nbsp;<span class="legend-pct">12%</span></div>
+            </div>
+          </div>
+          <div class="autonomy-bar-track">
+            <div class="ab-seg ab-autonomous" style="width:41%">41%</div>
+            <div class="ab-seg ab-assisted"   style="width:30%">30%</div>
+            <div class="ab-seg ab-rescued"    style="width:17%">17%</div>
+            <div class="ab-seg ab-failed"     style="width:12%">12%</div>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Tasks Started</div>
+            <div class="kpi-value">1,284</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up">+8.4%</span>
+              <span class="kpi-period">vs prev 30d</span>
+              <div class="sparkline">
+                <span style="height:35%"></span><span style="height:45%"></span><span style="height:40%"></span>
+                <span style="height:55%"></span><span style="height:50%"></span><span style="height:65%"></span>
+                <span style="height:60%"></span><span style="height:80%"></span><span style="height:90%"></span><span style="height:100%"></span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Autonomy Rate</div>
+            <div class="kpi-value" style="color:var(--emerald)">41.2%</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up">+3.1%</span>
+              <span class="kpi-period">vs prev 30d</span>
+              <div class="sparkline">
+                <span style="height:50%;background:var(--emerald)"></span><span style="height:55%;background:var(--emerald)"></span>
+                <span style="height:52%;background:var(--emerald)"></span><span style="height:60%;background:var(--emerald)"></span>
+                <span style="height:65%;background:var(--emerald)"></span><span style="height:70%;background:var(--emerald)"></span>
+                <span style="height:75%;background:var(--emerald)"></span><span style="height:78%;background:var(--emerald)"></span>
+                <span style="height:82%;background:var(--emerald)"></span><span style="height:90%;background:var(--emerald)"></span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Cost / Merged PR</div>
+            <div class="kpi-value">$38.40</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend down">-5.2%</span>
+              <span class="kpi-period">vs prev 30d</span>
+              <div class="sparkline">
+                <span style="height:90%"></span><span style="height:85%"></span><span style="height:80%"></span>
+                <span style="height:78%"></span><span style="height:75%"></span><span style="height:72%"></span>
+                <span style="height:68%"></span><span style="height:65%"></span><span style="height:62%"></span><span style="height:58%"></span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Median Time to PR</div>
+            <div class="kpi-value">14.2m</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up">+0.8m</span>
+              <span class="kpi-period">vs prev 30d</span>
+              <div class="sparkline">
+                <span style="height:60%"></span><span style="height:65%"></span><span style="height:62%"></span>
+                <span style="height:70%"></span><span style="height:68%"></span><span style="height:72%"></span>
+                <span style="height:74%"></span><span style="height:70%"></span><span style="height:75%"></span><span style="height:78%"></span>
+              </div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Active Users</div>
+            <div class="kpi-value">12</div>
+            <div class="kpi-meta">
+              <span class="kpi-trend up">+2</span>
+              <span class="kpi-period">vs prev 30d</span>
+              <div class="sparkline">
+                <span style="height:50%"></span><span style="height:50%"></span><span style="height:60%"></span>
+                <span style="height:60%"></span><span style="height:70%"></span><span style="height:70%"></span>
+                <span style="height:80%"></span><span style="height:80%"></span><span style="height:90%"></span><span style="height:100%"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="chart-row">
+          <div class="chart-card" style="height:220px;">
+            <div class="chart-title">Tasks Over Time <span>stacked by autonomy band</span></div>
+            <div class="chart-area">
+              <!-- Stacked area chart bars representing 30 days -->
+              <div class="chart-lines">
+                <!-- Simplified bar representation of stacked area -->
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:1px;height:100%;">
+                  <div style="display:flex;align-items:flex-end;gap:2px;height:100%;">
+                    <!-- 10 day blocks -->
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:20%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:16%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:28%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:36%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:18%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:17%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:38%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:15%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:17%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:28%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:40%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:14%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:16%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:48%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:12%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:16%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:52%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:10%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:15%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:31%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:58%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                    <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;">
+                      <div style="height:9%;background:var(--rose);border-radius:1px;opacity:.8"></div>
+                      <div style="height:14%;background:var(--amber);opacity:.8"></div>
+                      <div style="height:31%;background:var(--sky);opacity:.8"></div>
+                      <div style="height:62%;background:var(--emerald);border-radius:1px 1px 0 0;opacity:.8"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" style="height:220px;">
+            <div class="chart-title">Team Scatter <span>task volume vs autonomy rate</span></div>
+            <div class="chart-area" style="position:relative;">
+              <div style="position:absolute;inset:8px;">
+                <!-- axis labels -->
+                <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:9px;color:var(--txt-dim);font-style:italic">Task Volume →</div>
+                <div style="position:absolute;left:4px;top:0;bottom:20px;display:flex;align-items:center;writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;color:var(--txt-dim);font-style:italic">Autonomy Rate →</div>
+                <!-- reference lines -->
+                <div style="position:absolute;left:50%;top:10px;bottom:20px;border-left:1px dashed var(--border-hi);"></div>
+                <div style="position:absolute;top:50%;left:20px;right:0;border-top:1px dashed var(--border-hi);"></div>
+                <!-- team dots -->
+                <div style="position:absolute;left:30%;bottom:65%;width:34px;height:34px;border-radius:50%;background:var(--indigo);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;cursor:pointer" title="Platform — 340 tasks, 52% auto">PL</div>
+                <div style="position:absolute;left:65%;bottom:38%;width:30px;height:30px;border-radius:50%;background:var(--sky);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;cursor:pointer" title="Product — 420 tasks, 38% auto">PR</div>
+                <div style="position:absolute;left:20%;bottom:40%;width:26px;height:26px;border-radius:50%;background:var(--amber);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;cursor:pointer" title="Data Science — 220 tasks, 40% auto">DS</div>
+                <div style="position:absolute;left:52%;bottom:52%;width:28px;height:28px;border-radius:50%;background:var(--emerald);opacity:.8;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:700;cursor:pointer" title="Mobile — 310 tasks, 47% auto">MB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ OUTCOMES ══ -->
+<div id="outcomes">
+  <div class="section-header">
+    <h2>03 · Outcomes &amp; Quality</h2>
+    <span class="route">/outcomes</span>
+  </div>
+  <p class="frame-label">Primary question: Is the code agents write actually good?</p>
+  <div class="frame" style="min-height:720px;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item active"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Outcomes &amp; Quality</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+        <div class="filter-pill"><span class="label">Team</span><span class="val">All ▾</span></div>
+        <div class="filter-pill"><span class="label">Model</span><span class="val">All ▾</span></div>
+      </div>
+      <div class="page-body">
+        <div class="kpi-row four">
+          <div class="kpi-card">
+            <div class="kpi-label">Merge Rate</div>
+            <div class="kpi-value" style="color:var(--emerald)">78.4%</div>
+            <div class="kpi-meta"><span class="kpi-trend up">+2.1%</span><span class="kpi-period">vs prev 30d</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Human Edit Distance</div>
+            <div class="kpi-value">28.6%</div>
+            <div class="kpi-meta"><span class="kpi-trend up">-4.3%</span><span class="kpi-period">improving</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">CI Pass Rate (1st attempt)</div>
+            <div class="kpi-value" style="color:var(--emerald)">71.2%</div>
+            <div class="kpi-meta"><span class="kpi-trend up">+1.8%</span><span class="kpi-period">vs prev 30d</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Revert Rate</div>
+            <div class="kpi-value" style="color:var(--rose)">3.1%</div>
+            <div class="kpi-meta"><span class="kpi-trend down">+0.4%</span><span class="kpi-period">watch</span></div>
+          </div>
+        </div>
+
+        <div class="chart-row three">
+          <div class="chart-card" style="height:180px;">
+            <div class="chart-title">Human Edit Distance Trend</div>
+            <div class="chart-area">
+              <svg class="line-chart-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6366F1" stop-opacity=".3"/>
+                    <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,75 C20,73 40,68 60,64 S80,55 100,52 S130,44 160,38 S180,32 200,28" fill="none" stroke="#6366F1" stroke-width="2"/>
+                <path d="M0,75 C20,73 40,68 60,64 S80,55 100,52 S130,44 160,38 S180,32 200,28 L200,100 L0,100 Z" fill="url(#g1)"/>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-card" style="height:180px;">
+            <div class="chart-title">Outcome by Task Type <span>stacked</span></div>
+            <div class="chart-area">
+              <div class="chart-lines" style="align-items:flex-end;padding:8px 6px;">
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:80%;">
+                  <div style="height:10%;background:var(--rose);opacity:.8;border-radius:1px"></div>
+                  <div style="height:20%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:40%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:65%;">
+                  <div style="height:8%;background:var(--rose);opacity:.8"></div>
+                  <div style="height:15%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:28%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:49%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:90%;">
+                  <div style="height:14%;background:var(--rose);opacity:.8"></div>
+                  <div style="height:20%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:28%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:38%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:55%;">
+                  <div style="height:6%;background:var(--rose);opacity:.8"></div>
+                  <div style="height:10%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:25%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:59%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:70%;">
+                  <div style="height:12%;background:var(--rose);opacity:.8"></div>
+                  <div style="height:18%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:40%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:50%;">
+                  <div style="height:5%;background:var(--rose);opacity:.8"></div>
+                  <div style="height:8%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:22%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:65%;background:var(--emerald);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card" style="height:180px;">
+            <div class="chart-title">Review Comments / PR</div>
+            <div class="chart-area">
+              <svg class="line-chart-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path d="M0,50 C30,52 50,48 70,55 S90,60 110,54 S140,48 160,42 S180,40 200,38" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-dasharray="4,2"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-table">
+          <div class="table-header"><span class="ttl">PR Outcomes by Repo × Task Type</span></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Repo <span class="sort">↕</span></th>
+                <th>Task Type <span class="sort">↕</span></th>
+                <th>Merge Rate <span class="sort">↓</span></th>
+                <th>Avg Edit Distance <span class="sort">↕</span></th>
+                <th>CI Pass (1st) <span class="sort">↕</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="mono">platform-core</span></td><td><span class="badge badge-info">bug_fix</span></td><td><span class="mono" style="color:var(--emerald)">88.2%</span></td><td><span class="mono">18.4%</span></td><td><span class="mono">79.1%</span></td></tr>
+              <tr><td><span class="mono">webapp</span></td><td><span class="badge badge-info">feature</span></td><td><span class="mono">71.4%</span></td><td><span class="mono" style="color:var(--amber)">54.2%</span></td><td><span class="mono">64.3%</span></td></tr>
+              <tr><td><span class="mono">data-pipeline</span></td><td><span class="badge badge-info">refactor</span></td><td><span class="mono">83.6%</span></td><td><span class="mono">22.1%</span></td><td><span class="mono">75.0%</span></td></tr>
+              <tr><td><span class="mono">mobile-app</span></td><td><span class="badge badge-info">tests</span></td><td><span class="mono" style="color:var(--emerald)">91.0%</span></td><td><span class="mono">9.3%</span></td><td><span class="mono">88.4%</span></td></tr>
+              <tr><td><span class="mono">shared-libs</span></td><td><span class="badge badge-info">docs</span></td><td><span class="mono" style="color:var(--emerald)">94.2%</span></td><td><span class="mono">7.1%</span></td><td><span class="mono">92.0%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ COST ══ -->
+<div id="cost">
+  <div class="section-header">
+    <h2>04 · Cost &amp; Efficiency</h2>
+    <span class="route">/cost</span>
+  </div>
+  <p class="frame-label">Primary question: Where is money going and what are we getting for it?</p>
+  <div class="frame" style="min-height:720px;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item active"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Cost &amp; Efficiency</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+        <div class="filter-pill"><span class="label">Team</span><span class="val">All ▾</span></div>
+        <div class="filter-pill"><span class="label">Model</span><span class="val">All ▾</span></div>
+      </div>
+      <div class="page-body">
+        <div class="kpi-row four">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Spend</div>
+            <div class="kpi-value">$4,821</div>
+            <div class="kpi-meta"><span class="kpi-trend up">+12.3%</span><span class="kpi-period">vs prev 30d</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Cost / Task</div>
+            <div class="kpi-value">$3.75</div>
+            <div class="kpi-meta"><span class="kpi-trend up">+3.4%</span><span class="kpi-period">vs prev 30d</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Cost / Merged PR</div>
+            <div class="kpi-value">$38.40</div>
+            <div class="kpi-meta"><span class="kpi-trend down">-5.2%</span><span class="kpi-period">improving</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Token Waste %</div>
+            <div class="kpi-value" style="color:var(--amber)">17.2%</div>
+            <div class="kpi-meta"><span class="kpi-trend down">-2.1%</span><span class="kpi-period">improving</span></div>
+          </div>
+        </div>
+
+        <div class="chart-row three">
+          <div class="chart-card" style="height:200px;">
+            <div class="chart-title">Spend Over Time</div>
+            <div class="chart-area">
+              <svg class="line-chart-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6366F1" stop-opacity=".25"/>
+                    <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,75 C20,70 40,65 50,60 S60,55 70,52 S80,48 90,52 S100,80 110,75 S130,55 150,45 S170,40 200,35" fill="none" stroke="#6366F1" stroke-width="2"/>
+                <circle cx="100" cy="80" r="4" fill="var(--rose)" opacity=".9"/>
+                <text x="95" y="94" fill="var(--rose)" font-size="8" font-family="JetBrains Mono">spike</text>
+                <path d="M0,75 C20,70 40,65 50,60 S60,55 70,52 S80,48 90,52 S100,80 110,75 S130,55 150,45 S170,40 200,35 L200,100 L0,100Z" fill="url(#g2)"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="chart-card" style="height:200px;">
+            <div class="chart-title">Budget Burn <span>vs monthly budget</span></div>
+            <div class="chart-area">
+              <div class="gauge-wrap">
+                <div class="gauge-arc">
+                  <div class="gauge-track">
+                    <div class="gauge-fill" style="background:conic-gradient(from 180deg, var(--emerald) 0deg, var(--emerald) 110deg, transparent 110deg)"></div>
+                  </div>
+                  <div class="gauge-center">61%</div>
+                </div>
+                <div class="gauge-label">$4,821 of $8,000 budget</div>
+                <div style="font-size:9px;color:var(--txt-dim);margin-top:4px;">Turns red at 90%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" style="height:200px;">
+            <div class="chart-title">Cost / Merged PR by Task Type</div>
+            <div class="chart-area" style="padding:8px;">
+              <div class="hbar-row"><div class="hbar-label">feature</div><div class="hbar-track"><div class="hbar-fill" style="width:90%;background:var(--indigo)"><span class="hbar-val">$74</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">refactor</div><div class="hbar-track"><div class="hbar-fill" style="width:62%;background:var(--sky)"><span class="hbar-val">$51</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">dependency_update</div><div class="hbar-track"><div class="hbar-fill" style="width:40%;background:var(--amber)"><span class="hbar-val">$33</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">bug_fix</div><div class="hbar-track"><div class="hbar-fill" style="width:22%;background:var(--emerald)"><span class="hbar-val">$18</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">tests</div><div class="hbar-track"><div class="hbar-fill" style="width:18%;background:var(--violet,#8B5CF6)"><span class="hbar-val">$15</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">docs</div><div class="hbar-track"><div class="hbar-fill" style="width:15%;background:var(--teal,#14B8A6)"><span class="hbar-val">$12</span></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-table">
+          <div class="table-header"><span class="ttl">Team Cost Breakdown</span></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Team</th><th>Spend <span class="sort">↓</span></th><th>Tasks</th><th>Cost/Task</th><th>Cost/Merged PR</th><th>Waste %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Platform</strong></td><td><span class="mono">$1,640</span></td><td><span class="mono">340</span></td><td><span class="mono">$4.82</span></td><td><span class="mono">$38.10</span></td><td><span class="mono" style="color:var(--emerald)">12.4%</span></td></tr>
+              <tr><td><strong>Product</strong></td><td><span class="mono">$1,920</span></td><td><span class="mono">420</span></td><td><span class="mono">$4.57</span></td><td><span class="mono">$42.80</span></td><td><span class="mono" style="color:var(--amber)">19.8%</span></td></tr>
+              <tr><td><strong>Data Science</strong></td><td><span class="mono">$780</span></td><td><span class="mono">220</span></td><td><span class="mono">$3.55</span></td><td><span class="mono">$33.20</span></td><td><span class="mono" style="color:var(--emerald)">14.1%</span></td></tr>
+              <tr><td><strong>Mobile</strong></td><td><span class="mono">$481</span></td><td><span class="mono">304</span></td><td><span class="mono">$1.58</span></td><td><span class="mono">$19.40</span></td><td><span class="mono" style="color:var(--emerald)">9.2%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ RELIABILITY ══ -->
+<div id="reliability">
+  <div class="section-header">
+    <h2>05 · Reliability &amp; Traces</h2>
+    <span class="route">/reliability</span>
+  </div>
+  <p class="frame-label">Primary question: Are agents healthy? Where do they fail?</p>
+  <div class="frame" style="min-height:800px;position:relative;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item active"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+    </div>
+    <div class="main" style="overflow:hidden;">
+      <div class="topbar">
+        <div class="topbar-title">Reliability &amp; Traces</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+        <div class="filter-pill"><span class="label">Team</span><span class="val">All ▾</span></div>
+        <div class="filter-pill"><span class="label">Status</span><span class="val">All ▾</span></div>
+      </div>
+      <div class="page-body">
+        <div class="kpi-row four">
+          <div class="kpi-card">
+            <div class="kpi-label">P95 Task Duration</div>
+            <div class="kpi-value">38.4m</div>
+            <div class="kpi-meta"><span class="kpi-trend down">+2.1m</span><span class="kpi-period">vs prev</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Tool Failure Rate</div>
+            <div class="kpi-value" style="color:var(--amber)">5.8%</div>
+            <div class="kpi-meta"><span class="kpi-trend down">+0.4%</span><span class="kpi-period">watch</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Timeout Rate</div>
+            <div class="kpi-value">2.1%</div>
+            <div class="kpi-meta"><span class="kpi-trend up">-0.3%</span><span class="kpi-period">improving</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Env Setup P95</div>
+            <div class="kpi-value">4.2m</div>
+            <div class="kpi-meta"><span class="kpi-trend up">-0.8m</span><span class="kpi-period">improving</span></div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-card" style="height:180px;">
+            <div class="chart-title">Task Duration P50 / P95 <span>multi-line</span></div>
+            <div class="chart-area">
+              <svg class="line-chart-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path d="M0,60 C30,58 60,55 90,52 S130,48 160,45 S180,44 200,42" fill="none" stroke="#6366F1" stroke-width="2"/>
+                <path d="M0,30 C30,28 60,32 90,28 S130,24 160,26 S180,20 200,18" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4,2"/>
+                <text x="4" y="40" fill="#6366F1" font-size="8" font-family="JetBrains Mono">P50</text>
+                <text x="4" y="22" fill="#F59E0B" font-size="8" font-family="JetBrains Mono">P95</text>
+              </svg>
+            </div>
+          </div>
+          <div class="chart-card" style="height:180px;">
+            <div class="chart-title">Error Rate by Category <span>6 lines</span></div>
+            <div class="chart-area">
+              <svg class="line-chart-svg" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path d="M0,55 C50,52 100,50 200,48" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+                <path d="M0,72 C50,70 100,68 200,65" fill="none" stroke="#F43F5E" stroke-width="1.5"/>
+                <path d="M0,80 C50,78 100,75 200,73" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
+                <path d="M0,85 C50,84 100,82 200,80" fill="none" stroke="#0EA5E9" stroke-width="1.5"/>
+                <path d="M0,88 C50,87 100,86 200,85" fill="none" stroke="#10B981" stroke-width="1.5"/>
+                <path d="M0,90 C50,89 100,88 200,87" fill="none" stroke="#8B5CF6" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tool Reliability Leaderboard + Tool Table side by side -->
+        <div class="chart-row">
+          <div class="chart-card" style="height:200px;">
+            <div class="chart-title">Tool Reliability Leaderboard <span>most-broken first</span></div>
+            <div class="chart-area" style="padding:8px;">
+              <div class="hbar-row"><div class="hbar-label">shell_command</div><div class="hbar-track"><div class="hbar-fill" style="width:82%;background:var(--rose)"><span class="hbar-val">8.2%</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">test_run</div><div class="hbar-track"><div class="hbar-fill" style="width:65%;background:var(--amber)"><span class="hbar-val">6.5%</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">policy_check</div><div class="hbar-track"><div class="hbar-fill" style="width:42%;background:var(--amber)"><span class="hbar-val">4.2%</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">git_operation</div><div class="hbar-track"><div class="hbar-fill" style="width:25%;background:var(--sky)"><span class="hbar-val">2.5%</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">model_call</div><div class="hbar-track"><div class="hbar-fill" style="width:12%;background:var(--emerald)"><span class="hbar-val">1.2%</span></div></div></div>
+              <div class="hbar-row"><div class="hbar-label">env_setup</div><div class="hbar-track"><div class="hbar-fill" style="width:8%;background:var(--emerald)"><span class="hbar-val">0.8%</span></div></div></div>
+            </div>
+          </div>
+
+          <div class="data-table" style="margin-bottom:0;">
+            <div class="table-header"><span class="ttl">Tool Performance</span></div>
+            <table>
+              <thead><tr><th>Tool</th><th>Calls</th><th>Error %</th><th>P50 ms</th><th>P95 ms</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">shell_command</span></td><td><span class="mono">4,821</span></td><td><span class="mono" style="color:var(--rose)">8.2%</span></td><td><span class="mono">320</span></td><td><span class="mono">2,840</span></td></tr>
+                <tr><td><span class="mono">test_run</span></td><td><span class="mono">2,104</span></td><td><span class="mono" style="color:var(--amber)">6.5%</span></td><td><span class="mono">8,200</span></td><td><span class="mono">42,100</span></td></tr>
+                <tr><td><span class="mono">model_call</span></td><td><span class="mono">12,580</span></td><td><span class="mono" style="color:var(--emerald)">1.2%</span></td><td><span class="mono">1,840</span></td><td><span class="mono">6,200</span></td></tr>
+                <tr><td><span class="mono">git_operation</span></td><td><span class="mono">3,420</span></td><td><span class="mono" style="color:var(--emerald)">2.5%</span></td><td><span class="mono">180</span></td><td><span class="mono">940</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Task list with span drawer -->
+        <div class="data-table" style="margin-top:10px;position:relative;">
+          <div class="table-header">
+            <span class="ttl">Recent Tasks</span>
+            <div style="display:flex;gap:6px;">
+              <span class="badge badge-completed">completed</span>
+              <span class="badge badge-failed">failed</span>
+              <span class="badge badge-blocked">blocked</span>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Task ID</th><th>Type</th><th>Repo</th><th>Duration</th><th>Status</th><th>Model</th><th></th></tr></thead>
+            <tbody>
+              <tr style="cursor:pointer;"><td><span class="mono">tsk_a8f2b</span></td><td><span class="badge badge-info">bug_fix</span></td><td><span class="mono dim">platform-core</span></td><td><span class="mono">12m 34s</span></td><td><span class="badge badge-completed">completed</span></td><td><span class="mono dim">sonnet-4-6</span></td><td style="color:var(--indigo);font-size:11px;">View spans →</td></tr>
+              <tr style="cursor:pointer;"><td><span class="mono">tsk_c3d9e</span></td><td><span class="badge badge-info">feature</span></td><td><span class="mono dim">webapp</span></td><td><span class="mono">48m 02s</span></td><td><span class="badge badge-failed">failed</span></td><td><span class="mono dim">opus-4</span></td><td style="color:var(--indigo);font-size:11px;">View spans →</td></tr>
+              <tr style="cursor:pointer;background:rgba(99,102,241,.05);border-left:2px solid var(--indigo);"><td><span class="mono" style="color:var(--indigo)">tsk_f1a4c</span></td><td><span class="badge badge-info">refactor</span></td><td><span class="mono dim">data-pipeline</span></td><td><span class="mono">22m 18s</span></td><td><span class="badge badge-completed">completed</span></td><td><span class="mono dim">haiku-4-5</span></td><td style="color:var(--indigo);font-size:11px;font-weight:600;">← selected</td></tr>
+              <tr style="cursor:pointer;"><td><span class="mono">tsk_b7e1d</span></td><td><span class="badge badge-info">tests</span></td><td><span class="mono dim">mobile-app</span></td><td><span class="mono">—</span></td><td><span class="badge badge-blocked">blocked</span></td><td><span class="mono dim">sonnet-4-6</span></td><td style="color:var(--indigo);font-size:11px;">View spans →</td></tr>
+            </tbody>
+          </table>
+
+          <!-- Span Drawer overlay (shown for selected task) -->
+          <div class="drawer-overlay" style="position:absolute;">
+            <div class="drawer">
+              <div class="drawer-header">
+                <div>
+                  <div class="drawer-title">Task Spans</div>
+                  <div class="drawer-sub">tsk_f1a4c · refactor · data-pipeline</div>
+                </div>
+                <div class="drawer-close">✕</div>
+              </div>
+              <div class="drawer-body">
+                <div class="span-row">
+                  <div class="span-icon" style="background:rgba(14,165,233,.15)">🔧</div>
+                  <div class="span-info"><div class="span-name">env_setup</div><div class="span-type">operator</div></div>
+                  <div class="span-dur">2,840ms</div>
+                  <div class="span-status-dot" style="background:var(--emerald)"></div>
+                </div>
+                <div class="span-row">
+                  <div class="span-icon" style="background:rgba(99,102,241,.15)">🧠</div>
+                  <div class="span-info"><div class="span-name">claude-sonnet-4-6 · plan</div><div class="span-type">model_call</div></div>
+                  <div class="span-dur">4,120ms</div>
+                  <div class="span-status-dot" style="background:var(--emerald)"></div>
+                </div>
+                <div class="span-row">
+                  <div class="span-icon" style="background:rgba(245,158,11,.15)">⚡</div>
+                  <div class="span-info"><div class="span-name">run rg --type ts</div><div class="span-type">shell_command</div></div>
+                  <div class="span-dur">320ms</div>
+                  <div class="span-status-dot" style="background:var(--emerald)"></div>
+                </div>
+                <div class="span-row error">
+                  <div class="span-icon" style="background:rgba(244,63,94,.15)">⚠</div>
+                  <div class="span-info"><div class="span-name">run pnpm test</div><div class="span-type">test_run · tool_error</div></div>
+                  <div class="span-dur">18,400ms</div>
+                  <div class="span-status-dot" style="background:var(--rose)"></div>
+                </div>
+                <div class="span-row">
+                  <div class="span-icon" style="background:rgba(99,102,241,.15)">🧠</div>
+                  <div class="span-info"><div class="span-name">claude-sonnet-4-6 · fix</div><div class="span-type">model_call</div></div>
+                  <div class="span-dur">6,880ms</div>
+                  <div class="span-status-dot" style="background:var(--emerald)"></div>
+                </div>
+                <div class="span-row">
+                  <div class="span-icon" style="background:rgba(16,185,129,.15)">⎇</div>
+                  <div class="span-info"><div class="span-name">git push origin HEAD</div><div class="span-type">git_operation</div></div>
+                  <div class="span-dur">840ms</div>
+                  <div class="span-status-dot" style="background:var(--emerald)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ GOVERNANCE ══ -->
+<div id="governance">
+  <div class="section-header">
+    <h2>06 · Governance &amp; Audit</h2>
+    <span class="route">/governance</span>
+  </div>
+  <p class="frame-label">Primary question: Are agents operating safely within policy?</p>
+  <div class="frame" style="min-height:680px;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item active"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Governance &amp; Audit</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+        <div class="filter-pill"><span class="label">Type</span><span class="val">All ▾</span></div>
+      </div>
+      <div class="page-body">
+        <div class="kpi-row three">
+          <div class="kpi-card">
+            <div class="kpi-label">Policy Blocks</div>
+            <div class="kpi-value" style="color:var(--rose)">48</div>
+            <div class="kpi-meta"><span class="kpi-trend down">+12</span><span class="kpi-period">3.7% of tasks</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Secrets Detected</div>
+            <div class="kpi-value" style="color:var(--amber)">7</div>
+            <div class="kpi-meta"><span class="kpi-trend down">+2</span><span class="kpi-period">vs prev 30d</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Human Approvals Required</div>
+            <div class="kpi-value">31</div>
+            <div class="kpi-meta"><span class="kpi-trend up">-8</span><span class="kpi-period">improving</span></div>
+          </div>
+        </div>
+
+        <div class="chart-row full">
+          <div class="chart-card" style="height:200px;">
+            <div class="chart-title">Security Events Over Time <span>stacked by type</span></div>
+            <div class="chart-area">
+              <div class="chart-lines" style="align-items:flex-end;padding:8px 6px;">
+                <!-- 12 columns representing weeks -->
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:40%;">
+                  <div style="height:25%;background:var(--amber);opacity:.8;border-radius:1px"></div>
+                  <div style="height:35%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:40%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:35%;">
+                  <div style="height:20%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:50%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:50%;">
+                  <div style="height:18%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:52%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:45%;">
+                  <div style="height:22%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:28%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:50%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:60%;">
+                  <div style="height:30%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:25%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:45%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:100%;">
+                  <div style="height:15%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:20%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:65%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:45%;">
+                  <div style="height:20%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:30%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:50%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column-reverse;gap:1px;height:38%;">
+                  <div style="height:18%;background:var(--amber);opacity:.8"></div>
+                  <div style="height:32%;background:var(--sky);opacity:.8"></div>
+                  <div style="height:50%;background:var(--rose);opacity:.8;border-radius:1px 1px 0 0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-table">
+          <div class="table-header">
+            <span class="ttl">Security Event Log</span>
+            <div style="display:flex;gap:6px;">
+              <span class="badge badge-critical">policy_block</span>
+              <span class="badge badge-warning">secret_detected</span>
+              <span class="badge badge-info">human_approval</span>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Severity</th><th>Type</th><th>Task ID</th><th>Repo</th><th>Timestamp</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-critical">● critical</span></td><td>policy_block</td><td><span class="mono">tsk_c3d9e</span></td><td><span class="mono dim">webapp</span></td><td><span class="mono dim">2h ago</span></td></tr>
+              <tr><td><span class="badge badge-warning">● warning</span></td><td>secret_detected</td><td><span class="mono">tsk_g2h8k</span></td><td><span class="mono dim">platform-core</span></td><td><span class="mono dim">6h ago</span></td></tr>
+              <tr><td><span class="badge badge-info">● info</span></td><td>human_approval_required</td><td><span class="mono">tsk_m5n2p</span></td><td><span class="mono dim">data-pipeline</span></td><td><span class="mono dim">1d ago</span></td></tr>
+              <tr><td><span class="badge badge-critical">● critical</span></td><td>policy_block</td><td><span class="mono">tsk_r8s4t</span></td><td><span class="mono dim">mobile-app</span></td><td><span class="mono dim">2d ago</span></td></tr>
+              <tr><td><span class="badge badge-warning">● warning</span></td><td>secret_detected</td><td><span class="mono">tsk_v1w9x</span></td><td><span class="mono dim">shared-libs</span></td><td><span class="mono dim">3d ago</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ TEAM DRILL-DOWN ══ -->
+<div id="team">
+  <div class="section-header">
+    <h2>07 · Team Drill-Down</h2>
+    <span class="route">/teams/:teamId</span>
+  </div>
+  <p class="frame-label">Example: Platform team — summary across all 4 mini-sections</p>
+  <div class="frame" style="min-height:680px;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+      <div class="nav-group-label" style="margin-top:8px;">Teams</div>
+      <div class="nav-item active"><span class="nav-icon">▸</span> Platform</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Product</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Data Science</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Mobile</div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">Platform</div>
+        <div class="topbar-sub">Team drill-down</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+      </div>
+      <div class="page-body">
+
+        <!-- Team header stats -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Tasks</div><div class="kpi-value">340</div></div>
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Autonomy Rate</div><div class="kpi-value" style="color:var(--emerald)">52.1%</div></div>
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Total Spend</div><div class="kpi-value">$1,640</div></div>
+        </div>
+
+        <!-- Mini sections -->
+        <div class="mini-sections">
+          <div class="mini-section">
+            <div class="mini-section-title">Outcomes</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Merge Rate</span><span class="mini-metric-val" style="color:var(--emerald)">84.2%</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Avg Edit Distance</span><span class="mini-metric-val">21.4%</span></div>
+            <div class="mini-link">View full Outcomes →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Cost</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Cost / Merged PR</span><span class="mini-metric-val">$38.10</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Token Waste %</span><span class="mini-metric-val" style="color:var(--emerald)">12.4%</span></div>
+            <div class="mini-link">View full Cost →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Reliability</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">P95 Task Duration</span><span class="mini-metric-val">34.8m</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Tool Failure Rate</span><span class="mini-metric-val" style="color:var(--emerald)">4.1%</span></div>
+            <div class="mini-link">View full Reliability →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Governance</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Policy Blocks</span><span class="mini-metric-val">12</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Secrets Detected</span><span class="mini-metric-val" style="color:var(--rose)">2</span></div>
+            <div class="mini-link">View full Governance →</div>
+          </div>
+        </div>
+
+        <!-- Member list -->
+        <div class="data-table">
+          <div class="table-header"><span class="ttl">Team Members</span><span style="font-size:10px;color:var(--txt-muted)">Self-service stats — not a ranking</span></div>
+          <div>
+            <div class="member-row">
+              <div class="member-avatar" style="background:#4F46E5">AL</div>
+              <div class="member-name">Alex Liu</div>
+              <div class="member-stat">84 tasks</div>
+              <div class="member-stat">54% auto</div>
+              <div class="member-stat">$412</div>
+            </div>
+            <div class="member-row">
+              <div class="member-avatar" style="background:#0891B2">SJ</div>
+              <div class="member-name">Sara Johnson</div>
+              <div class="member-stat">76 tasks</div>
+              <div class="member-stat">49% auto</div>
+              <div class="member-stat">$388</div>
+            </div>
+            <div class="member-row">
+              <div class="member-avatar" style="background:#059669">MK</div>
+              <div class="member-name">Marco Kim</div>
+              <div class="member-stat">92 tasks</div>
+              <div class="member-stat">58% auto</div>
+              <div class="member-stat">$440</div>
+            </div>
+            <div class="member-row">
+              <div class="member-avatar" style="background:#B45309">PW</div>
+              <div class="member-name">Priya Wang</div>
+              <div class="member-stat">88 tasks</div>
+              <div class="member-stat">47% auto</div>
+              <div class="member-stat">$400</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ REPO DRILL-DOWN ══ -->
+<div id="repo">
+  <div class="section-header">
+    <h2>08 · Repo Drill-Down</h2>
+    <span class="route">/repos/:repoId</span>
+  </div>
+  <p class="frame-label">Example: webapp — includes repo readiness strip</p>
+  <div class="frame" style="min-height:640px;">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="icon">F</div>
+        <div><div class="wordmark">Flightdeck</div><div class="org">Acme Corp</div></div>
+      </div>
+      <div class="nav-group-label">Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">◈</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">✓</span> Outcomes</div>
+      <div class="nav-item"><span class="nav-icon">$</span> Cost</div>
+      <div class="nav-item"><span class="nav-icon">⏱</span> Reliability</div>
+      <div class="nav-item"><span class="nav-icon">🔒</span> Governance <span class="badge">3</span></div>
+      <div class="nav-group-label" style="margin-top:8px;">Teams</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Platform</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Product</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Data Science</div>
+      <div class="nav-item"><span class="nav-icon">▸</span> Mobile</div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">webapp</div>
+        <div class="topbar-sub">Repo drill-down · Product team</div>
+        <div class="filter-pill ml-auto"><span class="label">Period</span><span class="val">30d ▾</span></div>
+      </div>
+      <div class="page-body">
+
+        <!-- Repo readiness strip -->
+        <div class="readiness-strip">
+          <div class="readiness-badge pass">
+            <span class="icon icon-val">✓</span>
+            <span class="text">Test command detected</span>
+          </div>
+          <div class="readiness-badge pass">
+            <span class="icon icon-val">✓</span>
+            <span class="text">CI configured</span>
+          </div>
+          <div class="readiness-badge fail">
+            <span class="icon icon-val">✗</span>
+            <span class="text">Agent instructions missing</span>
+          </div>
+        </div>
+
+        <!-- Repo header stats -->
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Tasks</div><div class="kpi-value">186</div></div>
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Autonomy Rate</div><div class="kpi-value" style="color:var(--amber)">34.8%</div></div>
+          <div class="kpi-card" style="flex:1;"><div class="kpi-label">Total Spend</div><div class="kpi-value">$924</div></div>
+        </div>
+
+        <!-- Mini sections -->
+        <div class="mini-sections">
+          <div class="mini-section">
+            <div class="mini-section-title">Outcomes</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Merge Rate</span><span class="mini-metric-val">71.4%</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Avg Edit Distance</span><span class="mini-metric-val" style="color:var(--amber)">54.2%</span></div>
+            <div style="font-size:10px;color:var(--txt-dim);margin-top:4px;font-style:italic">High edit distance — agent instructions missing may explain variance</div>
+            <div class="mini-link" style="margin-top:6px;">View full Outcomes →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Cost</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Cost / Merged PR</span><span class="mini-metric-val" style="color:var(--amber)">$42.80</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Token Waste %</span><span class="mini-metric-val" style="color:var(--rose)">22.1%</span></div>
+            <div class="mini-link">View full Cost →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Reliability</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">P95 Task Duration</span><span class="mini-metric-val" style="color:var(--amber)">44.2m</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Tool Failure Rate</span><span class="mini-metric-val">7.8%</span></div>
+            <div class="mini-link">View full Reliability →</div>
+          </div>
+          <div class="mini-section">
+            <div class="mini-section-title">Governance</div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Policy Blocks</span><span class="mini-metric-val" style="color:var(--rose)">18</span></div>
+            <div class="mini-metric-row"><span class="mini-metric-label">Secrets Detected</span><span class="mini-metric-val" style="color:var(--rose)">4</span></div>
+            <div class="mini-link">View full Governance →</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer annotation -->
+<div style="text-align:center;padding:40px 0 20px;font-size:11px;color:var(--txt-dim);border-top:1px solid var(--border);margin-top:20px;">
+  Flightdeck — Wireframes v1.0 &nbsp;·&nbsp; 8 views &nbsp;·&nbsp; Dark mode, 1280px layout &nbsp;·&nbsp; JetBrains Mono + Inter
+</div>
+
+<script>
+  // Smooth scroll for nav
+  document.querySelectorAll('.page-nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.page-nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+
+  // Update active nav on scroll
+  const sections = ['login','overview','outcomes','cost','reliability','governance','team','repo'];
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top < 200) current = id;
+    });
+    if (current) {
+      document.querySelectorAll('.page-nav a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+  });
+</script>
+</body>
+</html>
