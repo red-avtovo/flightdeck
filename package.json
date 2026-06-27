@@ -23,6 +23,9 @@
     "react-router-dom": "^6.30.1",
     "recharts": "^2.15.3"
   },
+  "pnpm": {
+    "allowedBuildScripts": ["@swc/core", "esbuild"]
+  },
   "devDependencies": {
     "@storybook/addon-a11y": "^8.6.0",
     "@storybook/addon-essentials": "^8.6.0",
