@@ -11,7 +11,6 @@ const TOKEN_COST: Record<string, { inputPerM: number; outputPerM: number }> = {
   'claude-haiku-4-5': { inputPerM: 0.25, outputPerM: 1.25 },
 }
 
-const TERMINAL_STATUSES: TaskStatus[] = ['completed', 'failed', 'cancelled']
 const ALL_STATUSES: TaskStatus[] = ['completed', 'cancelled', 'failed', 'queued', 'running']
 const STATUS_WEIGHTS = [0.70, 0.15, 0.10, 0.03, 0.02]
 

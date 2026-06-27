@@ -5,6 +5,7 @@ import { generateRepos } from '../generateRepos'
 import { generateUsers } from '../generateUsers'
 import { generateTasks } from '../generateTasks'
 import { generateSpans } from '../generateSpans'
+import type { AgentTask } from '../../../types'
 
 describe('generateSpans', () => {
   const rng = createRng(42)
