@@ -151,7 +151,7 @@ function tokenWastePct(tasks: AgentTask[]): number {
   const total = totalSpend(tasks)
   if (total === 0) return 0
   const waste = tasks.filter(t => t.status === 'failed').reduce((sum, t) => sum + t.costUsd, 0)
-  return (waste / total) * 100
+  return waste / total
 }
 
 function buildTeamMetrics(team: Team, tasks: AgentTask[], prs: PullRequestOutcome[]): TeamMetrics {
@@ -221,6 +221,10 @@ export async function getOrgOverview(period: Period): Promise<OrgOverview> {
     autonomous: 0, human_assisted: 0, human_rescued: 0, failed: 0,
   }
   tasks.forEach(t => { autonomyBreakdown[t.autonomyBand as AutonomyBand]++ })
+  const total = tasks.length || 1
+  ;(Object.keys(autonomyBreakdown) as AutonomyBand[]).forEach(k => {
+    autonomyBreakdown[k] = autonomyBreakdown[k] / total
+  })
 
   // Active users
   const activeUsersSet = new Set(tasks.map(t => t.userId))

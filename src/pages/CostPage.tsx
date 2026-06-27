@@ -64,7 +64,7 @@ export default function CostPage() {
   }
 
   const { kpis, spendTrend, budgetBurnPct, costPerMergedPrByTaskType, teamBreakdown } = data
-  const spentUsd = budgetBurnPct * MONTHLY_BUDGET_USD
+  const spentUsd = (budgetBurnPct / 100) * MONTHLY_BUDGET_USD
 
   const costByType = costPerMergedPrByTaskType
     .filter(d => d.costUsd > 0)
