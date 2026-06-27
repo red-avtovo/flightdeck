@@ -11,7 +11,7 @@ interface Series {
 }
 
 interface LineChartProps {
-  data: Record<string, string | number>[]
+  data: any[]
   series: Series[]
   height?: number
   xKey?: string

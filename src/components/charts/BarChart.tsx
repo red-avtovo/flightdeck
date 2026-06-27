@@ -11,7 +11,7 @@ interface Series {
 }
 
 interface BarChartProps {
-  data: Record<string, string | number>[]
+  data: any[]
   series: Series[]
   height?: number
   layout?: 'vertical' | 'horizontal'

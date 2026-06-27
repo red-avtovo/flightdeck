@@ -10,7 +10,7 @@ interface Series {
 }
 
 interface StackedAreaChartProps {
-  data: Record<string, string | number>[]
+  data: any[]
   series: Series[]
   height?: number
 }

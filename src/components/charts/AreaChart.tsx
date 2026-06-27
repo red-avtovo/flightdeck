@@ -5,7 +5,7 @@ import {
 import { EmptyState } from '../ui/EmptyState'
 
 interface AreaChartProps {
-  data: Record<string, string | number>[]
+  data: any[]
   dataKey: string
   color?: string
   height?: number

@@ -82,17 +82,17 @@ export default function ReliabilityPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Task duration P50 / P95</h2>
-          <LineChart data={durationTrend as unknown as Record<string, string | number>[]} series={durationSeries} formatY={formatDuration} />
+          <LineChart data={durationTrend} series={durationSeries} formatY={formatDuration} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Error rate by category</h2>
-          <LineChart data={errorRateByCategory as unknown as Record<string, string | number>[]} series={errorSeries} formatY={v => formatPercent(v)} />
+          <LineChart data={errorRateByCategory} series={errorSeries} formatY={v => formatPercent(v)} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Tool reliability leaderboard</h2>
-          <BarChart data={toolLeaderboard as unknown as Record<string, string | number>[]} series={leaderboardSeries} layout="horizontal" xKey="name" height={220} formatY={v => formatPercent(v)} />
+          <BarChart data={toolLeaderboard} series={leaderboardSeries} layout="horizontal" xKey="name" height={220} formatY={v => formatPercent(v)} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
