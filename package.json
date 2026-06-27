@@ -24,7 +24,7 @@
     "recharts": "^2.15.3"
   },
   "pnpm": {
-    "allowedBuildScripts": ["@swc/core", "esbuild"]
+    "onlyBuiltDependencies": ["@swc/core", "esbuild"]
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^8.6.0",
