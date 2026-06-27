@@ -4,7 +4,7 @@ import { useFilters } from '../hooks/useFilters'
 import { useMockData } from '../hooks/useMockData'
 import { KpiCard } from '../components/cards/KpiCard'
 import { Skeleton } from '../components/ui/Skeleton'
-import { formatCurrency, formatDuration, formatPercent } from '../lib/utils'
+import { formatCurrency, formatPercent } from '../lib/utils'
 
 const SECTION_LINKS: Record<string, string> = {
   Outcomes:   '/outcomes',
