@@ -25,6 +25,14 @@ Thumbs.db
 # Test coverage
 coverage/
 
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# pnpm workaround files (not needed with pnpm v8)
+pnpm-ci.json
+pnpm-workspace.yaml
+.pnpmrc
+
 # Environment
 .env
 .env.local
