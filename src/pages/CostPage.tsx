@@ -90,7 +90,7 @@ export default function CostPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Spend over time</h2>
-          <AreaChart data={spendTrend} dataKey="value" formatY={formatCurrency} />
+          <AreaChart data={spendTrend as unknown as Record<string, string | number>[]} dataKey="value" formatY={formatCurrency} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 flex flex-col items-center">

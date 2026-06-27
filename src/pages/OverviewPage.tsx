@@ -7,8 +7,6 @@ import { AutonomyBar } from '../components/charts/AutonomyBar'
 import { StackedAreaChart } from '../components/charts/StackedAreaChart'
 import { ScatterChart } from '../components/charts/ScatterChart'
 import { AlertBadge } from '../components/cards/AlertBadge'
-import { Skeleton } from '../components/ui/Skeleton'
-import { formatCurrency, formatDuration, formatNumber } from '../lib/utils'
 import type { AutonomyBand } from '../types'
 
 export default function OverviewPage() {

@@ -59,12 +59,12 @@ export default function OutcomesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Rework trend over time</h2>
-          <LineChart data={editDistanceTrend} series={editDistanceSeries} formatY={v => `${v.toFixed(1)}%`} />
+          <LineChart data={editDistanceTrend as unknown as Record<string, string | number>[]} series={editDistanceSeries} formatY={v => `${v.toFixed(1)}%`} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Review comments per PR</h2>
-          <LineChart data={reviewCommentsTrend} series={commentsSeries} formatY={v => v.toFixed(1)} />
+          <LineChart data={reviewCommentsTrend as unknown as Record<string, string | number>[]} series={commentsSeries} formatY={v => v.toFixed(1)} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 col-span-full">
