@@ -12,6 +12,8 @@ const TOKEN_COST: Record<string, { inputPerM: number; outputPerM: number }> = {
 }
 
 const TERMINAL_STATUSES: TaskStatus[] = ['completed', 'failed', 'cancelled']
+const ALL_STATUSES: TaskStatus[] = ['completed', 'cancelled', 'failed', 'queued', 'running']
+const STATUS_WEIGHTS = [0.70, 0.15, 0.10, 0.03, 0.02]
 
 function weightedPick<T>(rng: Rng, items: readonly T[], weights: number[]): T {
   const r = rng.next()
@@ -58,8 +60,10 @@ export function generateTasks(
       const maxSecond = dayOffset > 0 ? 86399 : 0
       const startedAt = new Date(dayStart + rng.nextInt(0, maxSecond) * 1000).toISOString()
       const durationMs = Math.round(rng.logNormal(Math.log(180000), 0.8))
-      const completedAt = new Date(new Date(startedAt).getTime() + durationMs).toISOString()
-      const status = rng.pick(TERMINAL_STATUSES)
+      const calculatedCompletedAt = new Date(new Date(startedAt).getTime() + durationMs).toISOString()
+      const status = weightedPick(rng, ALL_STATUSES, STATUS_WEIGHTS)
+      const isNonTerminal = status === 'queued' || status === 'running'
+      const completedAt = isNonTerminal ? null : calculatedCompletedAt
       const inputTokens = rng.nextInt(1000, 50000)
       const outputTokens = rng.nextInt(500, 20000)
       const costs = TOKEN_COST[model]
@@ -69,6 +73,7 @@ export function generateTasks(
       const policyBlockCount = rng.nextBool(0.08) ? rng.nextInt(1, 3) : 0
       const humanInterventionRequired = rng.nextBool(0.12)
       const hasPr = status === 'completed' && rng.nextBool(0.85)
+      const prId = (hasPr && !isNonTerminal) ? `pr-${idCounter}` : null
 
       tasks.push({
         id: `task-${idCounter++}`,
@@ -88,7 +93,7 @@ export function generateTasks(
         failedToolCallCount,
         policyBlockCount,
         humanInterventionRequired,
-        prId: hasPr ? `pr-${idCounter}` : null,
+        prId,
         autonomyBand: null,
       })
     }

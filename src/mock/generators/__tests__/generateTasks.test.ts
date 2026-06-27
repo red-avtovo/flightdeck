@@ -50,7 +50,7 @@ describe('generateTasks', () => {
     expect(weekdayPerDay / weekendPerDay).toBeGreaterThanOrEqual(1.2)
   })
 
-  it('terminal tasks have an autonomyBand assigned', () => {
+  it('terminal tasks have autonomyBand null at generation time', () => {
     const terminal = tasks.filter(t =>
       t.status === 'completed' || t.status === 'failed' || t.status === 'cancelled',
     )
