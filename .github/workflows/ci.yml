@@ -50,7 +50,7 @@ jobs:
         run: pnpm build-storybook --quiet
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Run Storybook a11y tests
         run: |
