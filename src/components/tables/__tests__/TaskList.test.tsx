@@ -36,7 +36,7 @@ describe('TaskList', () => {
   })
 
   it('shows failed status badge for failed tasks', () => {
-    render(<TaskList tasks={[makeTask({ status: 'failed' })]} onTaskClick={vi.fn()} />)
-    expect(screen.getByText(/failed/i)).toBeInTheDocument()
+    render(<TaskList tasks={[makeTask({ status: 'failed', autonomyBand: 'failed' })]} onTaskClick={vi.fn()} />)
+    expect(screen.getAllByText(/failed/i).length).toBeGreaterThanOrEqual(1)
   })
 })

@@ -57,7 +57,6 @@ export function TaskList({ tasks, onTaskClick, loading = false }: TaskListProps)
                   key={task.id}
                   className="hover:bg-slate-800/50 transition-colors cursor-pointer"
                   onClick={() => onTaskClick(task)}
-                  role="row"
                   tabIndex={0}
                   onKeyDown={e => e.key === 'Enter' && onTaskClick(task)}
                   aria-label={`Task ${task.id}, status: ${task.status}`}
