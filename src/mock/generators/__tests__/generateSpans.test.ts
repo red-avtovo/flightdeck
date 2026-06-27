@@ -46,4 +46,11 @@ describe('generateSpans', () => {
     const tasks2 = generateTasks(rng2, t2, r2, u2)
     expect(generateSpans(rng2, tasks2)).toEqual(spans)
   })
+
+  it('skips non-terminal tasks (queued/running)', () => {
+    const rng = createRng(99)
+    const fakeTask = { ...tasks[0], id: 'fake-1', status: 'queued' } as AgentTask
+    const spans = generateSpans(rng, [fakeTask])
+    expect(spans).toHaveLength(0)
+  })
 })

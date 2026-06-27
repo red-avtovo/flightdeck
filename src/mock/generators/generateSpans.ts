@@ -16,7 +16,10 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
   const spans: TraceSpan[] = []
   let idCounter = 1
 
-  for (const task of tasks) {
+  // Filter to only completed and failed tasks
+  const terminalTasks = tasks.filter(t => t.status === 'completed' || t.status === 'failed')
+
+  for (const task of terminalTasks) {
     const taskStart = new Date(task.startedAt).getTime()
 
     // env_setup span (from operator)
@@ -45,7 +48,7 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
         ? rng.nextBool(0.7)
         : rng.nextBool(0.05)
       const isTimeout = !isError && rng.nextBool(0.02)
-      const status: SpanStatus = isTimeout ? 'timeout' : isError ? 'error' : 'ok'
+      const status: SpanStatus = isTimeout ? 'timeout' : isError && type === 'policy_check' ? 'blocked' : isError ? 'error' : 'ok'
       const isModelCall = type === 'model_call'
 
       spans.push({
