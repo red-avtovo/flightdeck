@@ -27,7 +27,7 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Unit tests with coverage
-        run: pnpm test:coverage --reporter=text
+        run: pnpm test:coverage
         # Fails if lines < 80% (threshold set in vitest.config.ts)
 
   storybook-test:
@@ -49,8 +49,14 @@ jobs:
       - name: Build Storybook
         run: pnpm build-storybook --quiet
 
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Run Storybook a11y tests
-        run: pnpm storybook:test --url file://$(pwd)/storybook-static/index.html
+        run: |
+          python3 -m http.server 6006 -d storybook-static &
+          sleep 2
+          pnpm storybook:test --url http://localhost:6006
         # Fails on any critical or serious axe-core violation
 
   build:
