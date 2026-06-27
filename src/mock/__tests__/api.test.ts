@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import {
   getTeams,
   getRepos,
-  getTasks,
+  getTaskList,
+  getTaskSpans,
+  getSecurityEvents,
   getOrgOverview,
   getOutcomesMetrics,
   getCostMetrics,
@@ -49,41 +51,88 @@ describe('Mock API', () => {
     })
   })
 
-  describe('getTasks', () => {
+  describe('getTaskList', () => {
     it('90d returns more tasks than 7d', async () => {
-      const tasks7 = await getTasks({ period: '7d' })
-      const tasks90 = await getTasks({ period: '90d' })
+      const tasks7 = await getTaskList({ period: '7d' })
+      const tasks90 = await getTaskList({ period: '90d' })
       expect(tasks90.length).toBeGreaterThan(tasks7.length)
     })
 
     it('30d returns more tasks than 7d and fewer than 90d', async () => {
-      const tasks7 = await getTasks({ period: '7d' })
-      const tasks30 = await getTasks({ period: '30d' })
-      const tasks90 = await getTasks({ period: '90d' })
+      const tasks7 = await getTaskList({ period: '7d' })
+      const tasks30 = await getTaskList({ period: '30d' })
+      const tasks90 = await getTaskList({ period: '90d' })
       expect(tasks30.length).toBeGreaterThan(tasks7.length)
       expect(tasks30.length).toBeLessThan(tasks90.length)
     })
 
     it('teamId filter returns only tasks for that team', async () => {
-      const all = await getTasks({ period: '90d' })
-      const filtered = await getTasks({ period: '90d', teamId: 'team-platform' })
+      const all = await getTaskList({ period: '90d' })
+      const filtered = await getTaskList({ period: '90d', teamId: 'team-platform' })
       expect(filtered.length).toBeGreaterThan(0)
       expect(filtered.length).toBeLessThan(all.length)
       filtered.forEach(t => expect(t.teamId).toBe('team-platform'))
     })
 
     it('all tasks have autonomyBand assigned by the API', async () => {
-      const tasks = await getTasks({ period: '90d' })
+      const tasks = await getTaskList({ period: '90d' })
       tasks.forEach(t => expect(t.autonomyBand).not.toBeNull())
     })
 
     it('status filter returns only matching tasks', async () => {
-      const completed = await getTasks({ period: '90d', status: 'completed' })
+      const completed = await getTaskList({ period: '90d', status: 'completed' })
       completed.forEach(t => expect(t.status).toBe('completed'))
     })
 
     it('is deterministic', async () => {
-      expect(await getTasks({ period: '30d' })).toEqual(await getTasks({ period: '30d' }))
+      expect(await getTaskList({ period: '30d' })).toEqual(await getTaskList({ period: '30d' }))
+    })
+  })
+
+  describe('getTaskSpans', () => {
+    it('returns an array of spans for a valid taskId', async () => {
+      const tasks = await getTaskList({ period: '90d' })
+      expect(tasks.length).toBeGreaterThan(0)
+      const taskId = tasks[0].id
+      const spans = await getTaskSpans(taskId)
+      expect(Array.isArray(spans)).toBe(true)
+      expect(spans.length).toBeGreaterThan(0)
+    })
+
+    it('returns empty array for an unknown taskId', async () => {
+      const spans = await getTaskSpans('non-existent-task-id')
+      expect(spans).toEqual([])
+    })
+
+    it('all returned spans belong to the requested taskId', async () => {
+      const tasks = await getTaskList({ period: '90d' })
+      const taskId = tasks[0].id
+      const spans = await getTaskSpans(taskId)
+      spans.forEach(s => expect(s.taskId).toBe(taskId))
+    })
+  })
+
+  describe('getSecurityEvents', () => {
+    it('resolves and returns an array', async () => {
+      const events = await getSecurityEvents('30d')
+      expect(Array.isArray(events)).toBe(true)
+    })
+
+    it('90d returns more events than 7d', async () => {
+      const events90 = await getSecurityEvents('90d')
+      const events7 = await getSecurityEvents('7d')
+      expect(events90.length).toBeGreaterThanOrEqual(events7.length)
+    })
+
+    it('all events have required fields', async () => {
+      const events = await getSecurityEvents('90d')
+      expect(events.length).toBeGreaterThan(0)
+      events.forEach(e => {
+        expect(e.id).toBeTruthy()
+        expect(e.taskId).toBeTruthy()
+        expect(e.type).toBeTruthy()
+        expect(e.createdAt).toBeTruthy()
+      })
     })
   })
 

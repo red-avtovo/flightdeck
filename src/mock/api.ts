@@ -13,6 +13,7 @@ import type {
   ReliabilityMetrics,
   Repo,
   RepoDetail,
+  SecurityEvent,
   SecurityEventType,
   SpanType,
   TaskFilters,
@@ -20,6 +21,7 @@ import type {
   Team,
   TeamDetail,
   TeamMetrics,
+  TraceSpan,
   TrendPoint,
   User,
 } from '../types'
@@ -51,6 +53,13 @@ const _securityEvents = generateSecurityEvents(_rng, _rawTasks, _teams)
 
 // Build lookup maps
 const _prByTaskId = new Map<string, PullRequestOutcome>(_prOutcomes.map(pr => [pr.taskId, pr]))
+
+const SPAN_MAP = new Map<string, TraceSpan[]>()
+_spans.forEach(s => {
+  const list = SPAN_MAP.get(s.taskId) ?? []
+  list.push(s)
+  SPAN_MAP.set(s.taskId, list)
+})
 
 // Enrich tasks with autonomyBand from PR outcomes (simpler form: pr ? pr.autonomyBand : 'failed')
 const _tasks: AgentTask[] = _rawTasks.map(task => {
@@ -175,13 +184,24 @@ export async function getRepos(): Promise<Repo[]> {
   return [..._repos]
 }
 
-export async function getTasks(filters: TaskFilters): Promise<AgentTask[]> {
+export async function getTaskList(filters: TaskFilters): Promise<AgentTask[]> {
   await delay()
   let result = tasksFor(filters.period)
   if (filters.teamId !== undefined) result = result.filter(t => t.teamId === filters.teamId)
   if (filters.model !== undefined) result = result.filter(t => t.model === filters.model)
   if (filters.status !== undefined) result = result.filter(t => t.status === filters.status)
   return result
+}
+
+export async function getTaskSpans(taskId: string): Promise<TraceSpan[]> {
+  await delay()
+  return SPAN_MAP.get(taskId) ?? []
+}
+
+export async function getSecurityEvents(period: Period): Promise<SecurityEvent[]> {
+  await delay()
+  const cutoff = NOW - periodMs(period)
+  return _securityEvents.filter(e => new Date(e.createdAt).getTime() >= cutoff)
 }
 
 export async function getOrgOverview(period: Period): Promise<OrgOverview> {
