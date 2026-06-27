@@ -27,13 +27,14 @@ describe('ReliabilityPage', () => {
     const { default: userEvent } = await import('@testing-library/user-event')
     const user = userEvent.setup()
     renderPage()
+    // Wait specifically for a task row with aria-label (TaskList may load after ToolTable)
     await waitFor(() => {
-      expect(screen.getAllByRole('row').length).toBeGreaterThan(2)
-    }, { timeout: 1000 })
-    // click first task row (after header)
-    const rows = screen.getAllByRole('row')
-    const taskRow = rows.find(r => r.getAttribute('aria-label')?.startsWith('Task'))
-    if (taskRow) await user.click(taskRow)
+      const taskRow = screen.getAllByRole('row').find(r => r.getAttribute('aria-label')?.startsWith('Task'))
+      expect(taskRow).toBeDefined()
+    }, { timeout: 2000 })
+    // click first task row
+    const taskRow = screen.getAllByRole('row').find(r => r.getAttribute('aria-label')?.startsWith('Task'))!
+    await user.click(taskRow)
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument()
     }, { timeout: 1000 })
