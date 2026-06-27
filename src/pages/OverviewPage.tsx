@@ -1,3 +1,98 @@
+import { useState } from 'react'
+import { getOrgOverview } from '../mock/api'
+import { useFilters } from '../hooks/useFilters'
+import { useMockData } from '../hooks/useMockData'
+import { KpiCard } from '../components/cards/KpiCard'
+import { AutonomyBar } from '../components/charts/AutonomyBar'
+import { StackedAreaChart } from '../components/charts/StackedAreaChart'
+import { ScatterChart } from '../components/charts/ScatterChart'
+import { AlertBadge } from '../components/cards/AlertBadge'
+import { Skeleton } from '../components/ui/Skeleton'
+import { formatCurrency, formatDuration, formatNumber } from '../lib/utils'
+import type { AutonomyBand } from '../types'
+
 export default function OverviewPage() {
-  return <p className="text-slate-400">Overview — coming in Stage 5</p>
+  const { period, teamId, model } = useFilters()
+  const { data, loading } = useMockData(() => getOrgOverview(period), [period, teamId, model])
+  const [activeBand, setActiveBand] = useState<AutonomyBand | null>(null)
+
+  const BAND_SERIES = [
+    { key: 'autonomous',    label: 'Autonomous',     color: '#10b981' },
+    { key: 'human_assisted',label: 'Human-assisted', color: '#0ea5e9' },
+    { key: 'human_rescued', label: 'Human-rescued',  color: '#f59e0b' },
+    { key: 'failed',        label: 'Failed',         color: '#f43f5e' },
+  ]
+
+  if (loading || !data) {
+    return (
+      <div className="space-y-6" role="status" aria-label="Loading overview">
+        <div className="animate-pulse rounded bg-slate-800 h-10 w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => <div key={i} className="animate-pulse rounded bg-slate-800 h-24" />)}
+        </div>
+        <div className="animate-pulse rounded bg-slate-800 h-64" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="animate-pulse rounded bg-slate-800 h-64" />
+          <div className="animate-pulse rounded bg-slate-800 h-64" />
+        </div>
+      </div>
+    )
+  }
+
+  const { autonomyBreakdown, kpis, tasksOverTime, teamScatter, alerts } = data
+  const filteredOverTime = activeBand
+    ? tasksOverTime.map(d => ({ date: d.date, [activeBand]: d[activeBand] }))
+    : tasksOverTime
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-lg font-semibold text-slate-50 mb-1">Organization Overview</h1>
+        <p className="text-sm text-slate-400">Are agents producing accepted output autonomously, at a reasonable cost?</p>
+      </div>
+
+      {/* Alerts strip */}
+      {alerts.length > 0 && (
+        <div className="flex flex-wrap gap-2 items-center p-3 rounded-lg border border-amber-800/40 bg-amber-950/20">
+          <span className="text-xs font-medium text-amber-400">Alerts ({alerts.length})</span>
+          {alerts.map(alert => (
+            <div key={alert.id} className="flex items-center gap-1.5">
+              <AlertBadge severity={alert.severity} label={alert.type.replace(/_/g, ' ')} />
+              <span className="text-xs text-slate-400">{alert.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Hero: AutonomyBar */}
+      <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Agent Autonomy Breakdown</h2>
+        <AutonomyBar breakdown={autonomyBreakdown} onBandClick={setActiveBand} activeBand={activeBand} />
+      </div>
+
+      {/* KPI row */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <KpiCard title="Tasks Started" value={kpis.tasksStarted.value} format="number" trend={kpis.tasksStarted.trendPct} sparkline={kpis.tasksStarted.sparkline} />
+        <KpiCard title="Autonomy Rate" value={kpis.autonomyRate.value} format="percent" trend={kpis.autonomyRate.trendPct} sparkline={kpis.autonomyRate.sparkline} tooltip="% of terminal tasks classified as autonomous (merged PR + <20% human edits)" />
+        <KpiCard title="Cost/Merged PR" value={kpis.costPerMergedPr.value} format="currency" trend={kpis.costPerMergedPr.trendPct} sparkline={kpis.costPerMergedPr.sparkline} />
+        <KpiCard title="Median Time to PR" value={kpis.medianTimeToPr.value} format="duration" trend={kpis.medianTimeToPr.trendPct} />
+        <KpiCard title="Active Users" value={kpis.activeUsers.value} format="number" trend={kpis.activeUsers.trendPct} sparkline={kpis.activeUsers.sparkline} />
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">
+            Tasks over time {activeBand ? `— ${activeBand.replace(/_/g, ' ')} only` : ''}
+          </h2>
+          <StackedAreaChart data={filteredOverTime} series={BAND_SERIES} />
+        </div>
+
+        <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Team comparison</h2>
+          <ScatterChart data={teamScatter} />
+        </div>
+      </div>
+    </div>
+  )
 }
