@@ -28,9 +28,8 @@ coverage/
 # Build artifacts
 tsconfig.tsbuildinfo
 
-# pnpm workaround files (not needed with pnpm v8)
+# pnpm workaround files
 pnpm-ci.json
-pnpm-workspace.yaml
 .pnpmrc
 
 # Environment
