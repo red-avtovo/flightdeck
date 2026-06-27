@@ -13,19 +13,19 @@ const MOCK_ROWS: TeamMetrics[] = [
 
 describe('TeamTable', () => {
   it('renders 3 data rows plus header row', () => {
-    render(<MemoryRouter><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
+    render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
     expect(screen.getAllByRole('row')).toHaveLength(4)
   })
 
   it('each team name is a link with href containing teamId', () => {
-    render(<MemoryRouter><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
+    render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
     const link = screen.getByRole('link', { name: 'Platform' })
     expect(link).toHaveAttribute('href', expect.stringContaining('team-platform'))
   })
 
   it('clicking Spend header sorts ascending then descending', async () => {
     const user = userEvent.setup()
-    render(<MemoryRouter><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
+    render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><TeamTable rows={MOCK_ROWS} /></MemoryRouter>)
     const spendHeader = screen.getByRole('button', { name: /spend/i })
     await user.click(spendHeader)
     const rows = screen.getAllByRole('row').slice(1)
@@ -36,7 +36,7 @@ describe('TeamTable', () => {
   })
 
   it('renders empty state when rows is empty', () => {
-    render(<MemoryRouter><TeamTable rows={[]} /></MemoryRouter>)
+    render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><TeamTable rows={[]} /></MemoryRouter>)
     expect(screen.getByText(/no teams found/i)).toBeInTheDocument()
   })
 })

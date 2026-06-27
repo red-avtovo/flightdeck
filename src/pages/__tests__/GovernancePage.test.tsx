@@ -5,7 +5,7 @@ import { FilterProvider } from '../../context/FilterContext'
 import GovernancePage from '../GovernancePage'
 
 function renderPage() {
-  return render(<MemoryRouter><FilterProvider><GovernancePage /></FilterProvider></MemoryRouter>)
+  return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FilterProvider><GovernancePage /></FilterProvider></MemoryRouter>)
 }
 
 describe('GovernancePage', () => {

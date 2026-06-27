@@ -7,7 +7,7 @@ function setup(authenticated: boolean) {
   sessionStorage.clear()
   if (authenticated) sessionStorage.setItem('authenticated', 'true')
   return render(
-    <MemoryRouter initialEntries={['/dashboard']}>
+    <MemoryRouter initialEntries={['/dashboard']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<div>Login Page</div>} />
         <Route element={<RequireAuth />}>

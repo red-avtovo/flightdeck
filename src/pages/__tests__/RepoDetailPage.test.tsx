@@ -6,7 +6,7 @@ import RepoDetailPage from '../RepoDetailPage'
 
 function renderPage(repoId = 'repo-platform-core') {
   return render(
-    <MemoryRouter initialEntries={[`/repos/${repoId}`]}>
+    <MemoryRouter initialEntries={[`/repos/${repoId}`]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <FilterProvider>
         <Routes>
           <Route path="/repos/:repoId" element={<RepoDetailPage />} />

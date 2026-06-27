@@ -6,7 +6,7 @@ import TeamDetailPage from '../TeamDetailPage'
 
 function renderPage(teamId = 'team-platform') {
   return render(
-    <MemoryRouter initialEntries={[`/teams/${teamId}`]}>
+    <MemoryRouter initialEntries={[`/teams/${teamId}`]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <FilterProvider>
         <Routes>
           <Route path="/teams/:teamId" element={<TeamDetailPage />} />

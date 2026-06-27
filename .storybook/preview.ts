@@ -25,7 +25,7 @@ const preview: Preview = {
   decorators: [
     Story => React.createElement(
       MemoryRouter,
-      null,
+      { future: { v7_startTransition: true, v7_relativeSplatPath: true } },
       React.createElement(FilterProvider, null, React.createElement(Story)),
     ),
   ],

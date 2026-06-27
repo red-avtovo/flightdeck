@@ -5,7 +5,7 @@ import { FilterProvider } from '../../context/FilterContext'
 import CostPage from '../CostPage'
 
 function renderPage() {
-  return render(<MemoryRouter><FilterProvider><CostPage /></FilterProvider></MemoryRouter>)
+  return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FilterProvider><CostPage /></FilterProvider></MemoryRouter>)
 }
 
 describe('CostPage', () => {

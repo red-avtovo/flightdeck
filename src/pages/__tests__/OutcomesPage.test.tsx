@@ -6,7 +6,7 @@ import OutcomesPage from '../OutcomesPage'
 
 function renderPage() {
   return render(
-    <MemoryRouter><FilterProvider><OutcomesPage /></FilterProvider></MemoryRouter>,
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FilterProvider><OutcomesPage /></FilterProvider></MemoryRouter>,
   )
 }
 

@@ -5,7 +5,7 @@ import { FilterProvider } from '../../context/FilterContext'
 import ReliabilityPage from '../ReliabilityPage'
 
 function renderPage() {
-  return render(<MemoryRouter><FilterProvider><ReliabilityPage /></FilterProvider></MemoryRouter>)
+  return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FilterProvider><ReliabilityPage /></FilterProvider></MemoryRouter>)
 }
 
 describe('ReliabilityPage', () => {

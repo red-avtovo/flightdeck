@@ -7,7 +7,7 @@ import LoginPage from '../LoginPage'
 function setup() {
   sessionStorage.clear()
   return render(
-    <MemoryRouter initialEntries={['/login']}>
+    <MemoryRouter initialEntries={['/login']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/overview" element={<div>Overview Page</div>} />

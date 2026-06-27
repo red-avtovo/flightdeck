@@ -29,7 +29,7 @@ function PageSkeleton() {
 
 export default function App() {
   return (
-    <BrowserRouter basename="/flightdeck">
+    <BrowserRouter basename="/flightdeck" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <FilterProvider>
         <Routes>
           <Route path="/login" element={

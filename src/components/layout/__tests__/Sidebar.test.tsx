@@ -6,7 +6,7 @@ import { Sidebar } from '../Sidebar'
 describe('Sidebar', () => {
   function setup() {
     return render(
-      <MemoryRouter initialEntries={['/overview']}>
+      <MemoryRouter initialEntries={['/overview']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Sidebar />
       </MemoryRouter>,
     )
