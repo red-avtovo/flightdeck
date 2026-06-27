@@ -1,3 +1,106 @@
+import { Link, useParams } from 'react-router-dom'
+import { getTeamDetail } from '../mock/api'
+import { useFilters } from '../hooks/useFilters'
+import { useMockData } from '../hooks/useMockData'
+import { KpiCard } from '../components/cards/KpiCard'
+import { Skeleton } from '../components/ui/Skeleton'
+import { formatCurrency, formatDuration, formatPercent } from '../lib/utils'
+
+const SECTION_LINKS: Record<string, string> = {
+  Outcomes:   '/outcomes',
+  Cost:       '/cost',
+  Reliability:'/reliability',
+  Governance: '/governance',
+}
+
 export default function TeamDetailPage() {
-  return <p className="text-slate-400">Team Detail — coming in Stage 5</p>
+  const { teamId = '' } = useParams<{ teamId: string }>()
+  const { period } = useFilters()
+  const { data, loading } = useMockData(() => getTeamDetail(teamId, period), [teamId, period])
+
+  if (loading || !data) {
+    return (
+      <div className="space-y-6" role="status" aria-label="Loading team detail">
+        <Skeleton className="h-20 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+        </div>
+        <Skeleton className="h-48" />
+      </div>
+    )
+  }
+
+  const { team, autonomyRate, taskCount, spendUsd, sections, members } = data
+
+  const MINI_SECTIONS = [
+    { label: 'Outcomes',    kpis: sections.outcomes,    labels: ['Merge Rate', 'CI Pass Rate'] },
+    { label: 'Cost',        kpis: sections.cost,        labels: ['Total Spend', 'Cost/Task'] },
+    { label: 'Reliability', kpis: sections.reliability, labels: ['P95 Duration', 'Tool Failure Rate'] },
+    { label: 'Governance',  kpis: sections.governance,  labels: ['Policy Blocks', 'Secrets Detected'] },
+  ]
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-slate-50">{team.name}</h1>
+            <p className="text-sm text-slate-400 mt-1">{team.memberCount} members</p>
+          </div>
+          <div className="flex gap-6 text-right">
+            <div><p className="text-xs text-slate-400">Tasks</p><p className="text-2xl font-bold tabular-nums text-slate-50">{taskCount}</p></div>
+            <div><p className="text-xs text-slate-400">Autonomy</p><p className="text-2xl font-bold tabular-nums text-slate-50">{formatPercent(autonomyRate)}</p></div>
+            <div><p className="text-xs text-slate-400">Spend</p><p className="text-2xl font-bold tabular-nums text-slate-50">{formatCurrency(spendUsd)}</p></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mini sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {MINI_SECTIONS.map(({ label, kpis, labels }) => (
+          <div key={label} className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</h2>
+              <Link
+                to={`${SECTION_LINKS[label]}?team=${teamId}`}
+                className="text-xs text-indigo-400 hover:text-indigo-300"
+              >
+                View full →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {kpis.map((kpi, i) => (
+                <KpiCard key={i} title={labels[i]} value={kpi.value} format="number" trend={kpi.trendPct} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Members */}
+      <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Team members</h2>
+        <table className="w-full" aria-label="Members">
+          <thead className="bg-slate-800">
+            <tr>
+              {['Name', 'Email', 'First Active', 'Last Active'].map(h => (
+                <th key={h} className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800">
+            {members.map(m => (
+              <tr key={m.id} className="hover:bg-slate-800/50">
+                <td className="px-3 py-2 text-sm text-slate-200 font-medium">{m.name}</td>
+                <td className="px-3 py-2 text-sm text-slate-400">{m.email}</td>
+                <td className="px-3 py-2 text-sm text-slate-400">{new Date(m.firstActive).toLocaleDateString()}</td>
+                <td className="px-3 py-2 text-sm text-slate-400">{new Date(m.lastActive).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
 }
