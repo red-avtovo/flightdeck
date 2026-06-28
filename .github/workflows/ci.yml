@@ -27,8 +27,20 @@ jobs:
         run: pnpm exec tsc --noEmit
 
       - name: Unit tests with coverage
-        run: pnpm test:coverage
-        # Fails if lines < 80% (threshold set in vitest.config.ts)
+        run: pnpm exec vitest run --coverage --reporter=default --reporter=json --outputFile=test-results.json
+        # Fails if a test fails or lines/functions < 80% (thresholds in vitest.config.ts)
+
+      - name: Publish test + coverage summary
+        if: always()
+        run: node .github/scripts/ci-summary.mjs
+
+      - name: Upload coverage badges
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: badges
+          path: badges/
+          if-no-files-found: ignore
 
   storybook-test:
     name: Storybook build & a11y
@@ -81,6 +93,14 @@ jobs:
 
       - name: Build Storybook into dist/storybook
         run: pnpm build-storybook -o dist/storybook --quiet
+
+      # Ship the badge JSON (from the test job) on Pages so the README's Shields
+      # endpoint badges read live values: <pages>/badges/{tests,coverage}.json
+      - name: Add coverage badges to the deploy
+        uses: actions/download-artifact@v4
+        with:
+          name: badges
+          path: dist/badges
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

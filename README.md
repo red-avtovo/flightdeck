@@ -1,5 +1,9 @@
 # Flightdeck
 
+[![CI](https://github.com/red-avtovo/flightdeck/actions/workflows/ci.yml/badge.svg)](https://github.com/red-avtovo/flightdeck/actions/workflows/ci.yml)
+![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fred-avtovo.github.io%2Fflightdeck%2Fbadges%2Ftests.json)
+![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fred-avtovo.github.io%2Fflightdeck%2Fbadges%2Fcoverage.json)
+
 **Org-level analytics for AI coding agents.** Flightdeck answers one question for
 engineering leadership:
 

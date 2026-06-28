@@ -9,6 +9,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     coverage: {
       provider: 'v8',
+      // text/text-summary for the console; json-summary feeds the CI summary + badges.
+      reporter: ['text', 'text-summary', 'json-summary'],
       thresholds: { lines: 80, functions: 80 },
       exclude: [
         // Build artifacts: CI runs coverage in a clean checkout, but locally
