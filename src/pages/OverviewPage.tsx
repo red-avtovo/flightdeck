@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getOrgOverview } from '../mock/api'
 import { useFilters } from '../hooks/useFilters'
 import { useMockData } from '../hooks/useMockData'
@@ -7,7 +6,7 @@ import { KpiCard } from '../components/cards/KpiCard'
 import { AutonomyBar } from '../components/charts/AutonomyBar'
 import { StackedAreaChart } from '../components/charts/StackedAreaChart'
 import { ScatterChart } from '../components/charts/ScatterChart'
-import { AlertBadge } from '../components/cards/AlertBadge'
+import { AlertsPanel } from '../components/cards/AlertsPanel'
 import type { AutonomyBand } from '../types'
 
 export default function OverviewPage() {
@@ -56,38 +55,9 @@ export default function OverviewPage() {
         <p className="text-sm text-slate-400">Are agents producing accepted output autonomously, at a reasonable cost?</p>
       </div>
 
-      {/* Alerts strip */}
-      {visibleAlerts.length > 0 && (
-        <div className="flex flex-wrap gap-2 items-center p-3 rounded-lg border border-amber-800/40 bg-amber-950/20">
-          <span className="text-xs font-medium text-amber-400">Alerts ({visibleAlerts.length})</span>
-          {visibleAlerts.map(alert => {
-            // Security-event alerts deep-link to their row in the Governance event log;
-            // the cost-spike anomaly has no event, so it points at the Cost page instead.
-            const href = alert.source === 'security_event' ? `/governance?event=${alert.refId}` : '/cost'
-            return (
-            <div key={alert.id} className="flex items-center gap-1.5">
-              <Link to={href} className="flex items-center gap-1.5 transition-opacity hover:opacity-80">
-                <AlertBadge severity={alert.severity} label={alert.type.replace(/_/g, ' ')} />
-                <span className="text-xs text-slate-400">{alert.message}</span>
-              </Link>
-              <button
-                onClick={() => dismissAlert(alert.id)}
-                aria-label={`Dismiss alert: ${alert.message}`}
-                className="ml-0.5 text-slate-500 hover:text-slate-300 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            )
-          })}
-          <Link
-            to="/governance"
-            className="ml-auto text-xs text-orange-400 hover:text-orange-300 transition-colors whitespace-nowrap"
-          >
-            View in Governance →
-          </Link>
-        </div>
-      )}
+      {/* Active alerts — a structured, scannable panel (see AlertsPanel) rather than a
+          run-on strip; each row deep-links to its Governance event. */}
+      <AlertsPanel alerts={visibleAlerts} onDismiss={dismissAlert} />
 
       {/* Hero: AutonomyBar */}
       <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">

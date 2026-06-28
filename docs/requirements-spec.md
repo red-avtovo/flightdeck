@@ -49,7 +49,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **Charts:**
   - Tasks over time (area, stacked by autonomy band)
   - Team scatter (x = task volume, y = autonomy rate — no ranking, pattern view)
-- **Alerts strip:** Dismissible, count of active alerts by severity, links to `/governance`. Alerts are **derived, not stored** — synthesized from high-severity Security Events plus the injected cost-spike anomaly (see Technical Spec `Alert` type) and returned inline on `getOrgOverview`. This active-alert count is the **single source of truth**: the same number drives the Governance sidebar badge and the Governance "Critical Alerts" KPI, and each security-event alert deep-links to its row in the Governance event log
+- **Alerts panel:** A titled "Active alerts" panel listing each alert as a separated, scannable row — a severity-coloured dot, the alert **type** in bold, and a muted **detail** (task + repo, or a measurable reason like "$9,820/day · 150% over budget"); the type is not repeated in the detail. Each row links to its source and has a dismiss control. Alerts are **derived, not stored** — synthesized from high-severity Security Events plus the injected cost-spike anomaly (see Technical Spec `Alert` type) and returned inline on `getOrgOverview`. This active-alert count is the **single source of truth**: the same number drives the Governance sidebar badge and the Governance "Critical Alerts" KPI, and each security-event alert deep-links to its row in the Governance event log
 - **Global time range:** 7d / 30d / 90d (segmented button group)
 
 ### FR-03: Outcomes & Quality (`/outcomes`)

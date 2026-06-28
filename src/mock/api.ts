@@ -234,7 +234,9 @@ function buildOrgAlerts(period: Period, team?: string, mdl?: string): Alert[] {
     severity: e.severity,
     source: 'security_event' as const,
     type: e.type,
-    message: `${e.type.replace(/_/g, ' ')} detected in task ${e.taskId}`,
+    // Detail only — the UI shows the type separately, so don't repeat it here.
+    // Locate the alert by task + repo (the actionable context).
+    message: `${e.taskId} · ${e.repoId}`,
     refId: e.id,
     createdAt: e.createdAt,
   }))
@@ -248,7 +250,8 @@ function buildOrgAlerts(period: Period, team?: string, mdl?: string): Alert[] {
       severity: 'warning',
       source: 'cost_anomaly',
       type: 'cost_spike',
-      message: `Daily spend $${dailyAvgSpend.toFixed(2)} exceeds 150% of budget`,
+      // Measurable reason (no repeated type): the daily run-rate vs the budget line.
+      message: `$${Math.round(dailyAvgSpend).toLocaleString('en-US')}/day · 150% over budget`,
       refId: 'org-acme',
       createdAt: new Date(NOW).toISOString(),
     })

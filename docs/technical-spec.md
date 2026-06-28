@@ -61,7 +61,8 @@ flightdeck/
 │   │   │   └── BudgetGauge.tsx
 │   │   ├── cards/
 │   │   │   ├── KpiCard.tsx
-│   │   │   └── AlertBadge.tsx
+│   │   │   ├── AlertBadge.tsx
+│   │   │   └── AlertsPanel.tsx     # Overview "Active alerts" list (dot + type + detail, deep-links)
 │   │   ├── tables/
 │   │   │   ├── TeamTable.tsx
 │   │   │   ├── OutcomeTable.tsx
@@ -443,6 +444,9 @@ getSecurityEvents(period: Period): Promise<SecurityEvent[]>
   tooltip="% of tasks merged with < 20% human edits"
 />
 ```
+
+### AlertsPanel
+Overview "Active alerts" panel. Renders `Alert[]` as a titled card with one row per alert: a severity-coloured dot, the alert `type` in bold (sentence-cased), and a muted `message` detail (task + repo for security events, or a measurable reason for the cost spike — the type is deliberately not repeated in the message). Each row is a `<Link>` to the alert's source (`/governance?event=<refId>` for security events, `/cost` for the cost spike); the dismiss button sits outside the link so dismissing never navigates. Renders nothing when the list is empty.
 
 ### SpanDrawer
 Slide-over panel. Opens when a task row is clicked in the TaskList. Renders a flat list of `TraceSpan` records sorted by `startedAt`. Each span row shows: type icon, name, duration badge, status dot. Error spans highlighted in rose. Closes on Escape or backdrop click. The fixed backdrop + panel are **portaled to `document.body`** (via `createPortal`) so they span the full viewport (`top:0`) regardless of where the drawer is rendered — rendered in-place inside a page's `space-y-*` wrapper, the `> * + *` margin would otherwise shift the fixed overlay down ~2rem.
