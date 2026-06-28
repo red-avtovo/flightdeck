@@ -442,7 +442,7 @@ getSecurityEvents(period: Period): Promise<SecurityEvent[]>
 ```
 
 ### SpanDrawer
-Slide-over panel. Opens when a task row is clicked in the TaskList. Renders a flat list of `TraceSpan` records sorted by `startedAt`. Each span row shows: type icon, name, duration badge, status dot. Error spans highlighted in rose. Closes on Escape or backdrop click.
+Slide-over panel. Opens when a task row is clicked in the TaskList. Renders a flat list of `TraceSpan` records sorted by `startedAt`. Each span row shows: type icon, name, duration badge, status dot. Error spans highlighted in rose. Closes on Escape or backdrop click. The fixed backdrop + panel are **portaled to `document.body`** (via `createPortal`) so they span the full viewport (`top:0`) regardless of where the drawer is rendered — rendered in-place inside a page's `space-y-*` wrapper, the `> * + *` margin would otherwise shift the fixed overlay down ~2rem.
 
 ### AutonomyBar
 Full-width segmented bar. Four segments with labels and percentages. Clicking a segment filters the tasks-over-time chart below to that band only.

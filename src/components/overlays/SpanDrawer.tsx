@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import type { TraceSpan } from '../../types'
 import { formatDuration } from '../../lib/utils'
 import { Skeleton } from '../ui/Skeleton'
@@ -33,7 +34,12 @@ export function SpanDrawer({ open, taskId, spans, onClose, loading = false }: Sp
 
   const sorted = [...spans].sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime())
 
-  return (
+  // Portal to <body> so the fixed backdrop/drawer escape the page DOM. Rendered in
+  // place, the page's `space-y-8` adds `margin-top: 2rem` to these (non-first)
+  // children, and margin on a fixed `top:0` element shifts it down — the drawer
+  // opened ~32px below the top. The portal also avoids ancestor containing-block
+  // and overflow-clipping surprises.
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -96,6 +102,7 @@ export function SpanDrawer({ open, taskId, spans, onClose, loading = false }: Sp
           )}
         </div>
       </aside>
-    </>
+    </>,
+    document.body,
   )
 }

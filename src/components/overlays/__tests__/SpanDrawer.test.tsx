@@ -23,9 +23,22 @@ describe('SpanDrawer', () => {
   })
 
   it('error span row has rose highlight', () => {
-    const { container } = render(<SpanDrawer open taskId="task-1" spans={SPANS} onClose={vi.fn()} />)
-    const errorRow = Array.from(container.querySelectorAll('tr')).find(r => r.textContent?.includes('shell-1'))
+    // Query via screen, not the render container: the drawer is portaled to <body>.
+    render(<SpanDrawer open taskId="task-1" spans={SPANS} onClose={vi.fn()} />)
+    const errorRow = screen.getAllByRole('row').find(r => r.textContent?.includes('shell-1'))
     expect(errorRow?.className).toMatch(/rose/)
+  })
+
+  it('portals the drawer to <body> so a page space-y margin cannot offset the fixed overlay', () => {
+    // Rendered in-place inside space-y-*, Tailwind's `> * + *` adds margin-top to the
+    // (non-first) fixed children and shifts the drawer down from top:0 — the portal avoids it.
+    render(
+      <div className="space-y-8">
+        <div>preceding card</div>
+        <SpanDrawer open taskId="task-1" spans={SPANS} onClose={vi.fn()} />
+      </div>,
+    )
+    expect(screen.getByRole('dialog').parentElement).toBe(document.body)
   })
 
   it('pressing Escape calls onClose', async () => {
