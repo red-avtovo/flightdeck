@@ -12,18 +12,29 @@ const ERROR_CATEGORY_FOR_TYPE: Record<SpanType, ErrorCategory> = {
   env_setup: 'env_setup',
 }
 
+// Map a failing span of a given type to a concrete failure status.
+function failureStatus(rng: Rng, type: SpanType): SpanStatus {
+  if (rng.nextBool(0.15)) return 'timeout'
+  if (type === 'policy_check') return 'blocked'
+  return 'error'
+}
+
 export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
   const spans: TraceSpan[] = []
   let idCounter = 1
 
-  // Filter to only completed and failed tasks
+  // Only terminal tasks produce a trace. Coherence invariants enforced below:
+  //   • a successful (completed) task contains NO failing spans
+  //   • a failed task contains AT LEAST ONE failing span (env, or a final agent span)
   const terminalTasks = tasks.filter(t => t.status === 'completed' || t.status === 'failed')
 
   for (const task of terminalTasks) {
+    const isFailed = task.status === 'failed'
     const taskStart = new Date(task.startedAt).getTime()
 
-    // env_setup span (from operator)
+    // env_setup span (from operator). Provisioning only fails for a failed task.
     const envDuration = Math.round(rng.logNormal(Math.log(8000), 0.4))
+    const envFailed = isFailed && rng.nextBool(0.15)
     spans.push({
       id: `span-${idCounter++}`,
       taskId: task.id,
@@ -31,26 +42,30 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
       name: 'provision-environment',
       startedAt: new Date(taskStart).toISOString(),
       durationMs: envDuration,
-      status: rng.nextBool(0.96) ? 'ok' : 'error',
-      errorCategory: undefined,
+      status: envFailed ? 'error' : 'ok',
+      errorCategory: envFailed ? 'env_setup' : undefined,
       source: 'operator',
     })
-    const lastSpan = spans[spans.length - 1]
-    if (lastSpan.status === 'error') lastSpan.errorCategory = 'env_setup'
 
-    // 4–12 agent spans
+    // If provisioning failed, the agent never ran — the failed span above is the cause.
+    if (envFailed) continue
+
+    // 4–12 agent spans. For a failed task the final span is forced to fail (the cause),
+    // and earlier spans may hit transient errors; a completed task stays all-green.
     const spanCount = rng.nextInt(4, 12)
+    const failIndex = isFailed ? spanCount - 1 : -1
     let cursor = taskStart + envDuration
     for (let i = 0; i < spanCount; i++) {
       const type = rng.pick(AGENT_SPAN_TYPES)
       const duration = Math.round(rng.logNormal(Math.log(15000), 0.7))
-      const isError = task.status === 'failed' && i === spanCount - 1
-        ? rng.nextBool(0.7)
-        : rng.nextBool(0.05)
-      const isTimeout = !isError && rng.nextBool(0.02)
-      const status: SpanStatus = isTimeout ? 'timeout' : isError && type === 'policy_check' ? 'blocked' : isError ? 'error' : 'ok'
-      const isModelCall = type === 'model_call'
 
+      const isFinalFailure = i === failIndex
+      const isTransientFailure = isFailed && !isFinalFailure && rng.nextBool(0.12)
+      const status: SpanStatus = (isFinalFailure || isTransientFailure)
+        ? failureStatus(rng, type)
+        : 'ok'
+
+      const isModelCall = type === 'model_call'
       spans.push({
         id: `span-${idCounter++}`,
         taskId: task.id,

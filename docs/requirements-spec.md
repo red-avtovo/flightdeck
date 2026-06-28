@@ -40,6 +40,8 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - On click: writes `authenticated: true` to `sessionStorage`, redirects to `/overview`
 - `<RequireAuth>` route guard wraps all dashboard routes — unauthenticated users redirect to `/login`
 - Refreshing the page within the same tab preserves session; opening a new tab requires re-login
+- **Signed-in identity:** the authenticated mock user (name, role, email, initials avatar) is shown in the sidebar footer for a professional, "you are signed in as…" feel. Identity comes from a single mock session module (`src/auth/session.ts`)
+- **Log out:** a Log out control in the sidebar footer drops the auth state (removes the `authenticated` flag) and returns to `/login`
 
 ### FR-02: Organization Overview (`/overview`)
 - **Hero:** Agent Autonomy Breakdown — full-width segmented bar showing % of **terminal tasks** (status completed / failed / cancelled) in each band: Autonomous / Human-assisted / Human-rescued / Failed. Non-terminal tasks (queued / running) are excluded from the denominator. A reverted PR counts as Failed, not as a merged band.
@@ -48,26 +50,26 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
   - Tasks over time (area, stacked by autonomy band)
   - Team scatter (x = task volume, y = autonomy rate — no ranking, pattern view)
 - **Alerts strip:** Dismissible, count of active alerts by severity, links to `/governance`. Alerts are **derived, not stored** — synthesized from high-severity Security Events plus the injected cost-spike anomaly (see Technical Spec `Alert` type) and returned inline on `getOrgOverview`
-- **Global time range:** 7d / 30d / 90d
+- **Global time range:** 7d / 30d / 90d (segmented button group)
 
 ### FR-03: Outcomes & Quality (`/outcomes`)
-- **KPI cards (4):** Merge Rate, Human Edit Distance %, CI Pass Rate (first attempt), Revert Rate
+- **KPI cards (4):** Merge Rate, Human Edit Distance %, CI Pass Rate (first attempt), Revert Rate — each with a sparkline + % vs prior period (Edit Distance and Revert Rate are lower-is-better)
   - **Merge Rate** = merged PRs ÷ PRs opened by the agent
   - **Human Edit Distance %** = `humanEditDistancePct` averaged over merged PRs (human commits/lines after the agent ÷ total)
   - **CI Pass Rate (first attempt)** = share of agent PRs whose **first** CI run passed (`ciFirstAttemptPassed`), independent of any later reruns (`ciStatus` holds the final status)
   - **Revert Rate** = PRs with status `reverted` ÷ merged PRs
 - **Charts:**
-  - Human edit distance trend over time (line)
-  - Outcome by task type (stacked bar: autonomous/assisted/rescued/failed per task type)
-  - Review comments per PR trend (line)
-- **Table:** PR outcomes — repo / task type / merge rate / avg edit distance / CI pass rate. Sortable.
+  - Human edit distance trend over time (line, with a dashed least-squares trend overlay)
+  - Outcome by task type (stacked bar of **absolute task counts** — autonomous/assisted/rescued/failed per task type, not percentages)
+  - Review comments per PR trend (line, with a dashed least-squares trend overlay)
+- **Table:** PR outcomes — repo / task type / merge rate / avg edit distance / CI pass rate. Sortable. Task type renders as a colour-coded badge (one hue per type) and the rate columns are traffic-light coloured (green good / amber warning / red poor, with the edit-distance scale flipped since less rework is better)
 
 ### FR-04: Cost & Efficiency (`/cost`)
 - **KPI cards (4):** Total Spend, Cost/Task, Cost/Merged PR, Token Waste %
   - **Token Waste %** = tokens spent on work that produced no accepted output ÷ total tokens. "Wasted" tokens = tokens from terminal tasks that did **not** result in a merged PR (failed / cancelled / PR closed-unmerged) **plus** tokens from tasks whose PR was later `reverted`. Tokens from successful merged PRs are never counted as waste.
 - **Charts:**
   - Spend over time (line)
-  - Budget burn gauge (radial, turns red at > 90%)
+  - Budget burn gauge (radial — emerald when normal, amber warning at ≥ 75%, turns red at > 90%)
   - Cost/merged PR by task type (horizontal bar — e.g., "bug_fix: $18, feature: $74, docs: $12")
 - **Table:** Team cost breakdown — team / spend / tasks / cost per task / cost per merged PR / waste %. Sortable.
 
@@ -98,9 +100,11 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **Repo Readiness strip:** 3 boolean badges — Test command detected / CI configured / Agent instructions present
 
 ### FR-09: Global Filters
-- Time range: 7d / 30d / 90d (persists across page navigation within session)
-- Team filter: all / specific team
-- Model filter: all / specific model
+- Time range: 7d / 30d / 90d, rendered as a **segmented button group** (not a dropdown); persists across page navigation within session
+- Team filter: all / specific team (dropdown)
+- Model filter: all / specific model (dropdown)
+- **All three filters are functional**: Team and Model are threaded into every org-level metric query (`getOrgOverview`, `getOutcomesMetrics`, `getCostMetrics`, `getReliabilityMetrics`, `getGovernanceMetrics`) so KPIs, charts, tables, and derived alerts all reflect the active filter set. Passing `null` for Team/Model means "all"
+- Team and Model selectors are hidden on drill-down pages (those scope by their route param); the Period button group remains
 - Drill-down pages scope locally and do not write back to global filters
 
 ---

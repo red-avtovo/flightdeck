@@ -40,4 +40,52 @@ describe('RepoDetailPage', () => {
       )
     }, { timeout: 1000 })
   })
+
+  it('shows human team name in subtitle instead of raw teamId', async () => {
+    renderPage()
+    await waitFor(() => {
+      // platform-core belongs to team-platform whose name is "Platform"
+      expect(screen.getByText(/Platform team/i)).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
+  it('does not show raw teamId in subtitle', async () => {
+    renderPage()
+    await waitFor(() => {
+      // the human name should appear; the raw id should not be the subtitle
+      expect(screen.queryByText('team-platform')).not.toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
+  it('shows correct Outcomes section labels', async () => {
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Merge Rate')).toBeInTheDocument()
+      expect(screen.getByText('Avg Edit Distance')).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
+  it('shows correct Cost section labels', async () => {
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Cost/Merged PR')).toBeInTheDocument()
+      expect(screen.getByText('Token Waste %')).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
+  it('shows correct Reliability section labels', async () => {
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('P95 Task Duration')).toBeInTheDocument()
+      expect(screen.getByText('Tool Failure Rate')).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
+  it('shows correct Governance section labels', async () => {
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Policy Blocks')).toBeInTheDocument()
+      expect(screen.getByText('Secrets Detected')).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
 })

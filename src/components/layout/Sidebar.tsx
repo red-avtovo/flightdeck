@@ -1,21 +1,47 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   GitMerge,
   DollarSign,
   Activity,
   ShieldCheck,
+  Users,
+  LogOut,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { getCurrentUser, logout } from '../../auth/session'
 
-const NAV_ITEMS = [
+interface NavItem {
+  to: string
+  label: string
+  Icon: LucideIcon
+  badge?: number
+}
+
+const NAV_ITEMS: NavItem[] = [
   { to: '/overview',    label: 'Overview',    Icon: LayoutDashboard },
   { to: '/outcomes',   label: 'Outcomes',    Icon: GitMerge },
   { to: '/cost',       label: 'Cost',         Icon: DollarSign },
   { to: '/reliability',label: 'Reliability',  Icon: Activity },
-  { to: '/governance', label: 'Governance',   Icon: ShieldCheck },
+  { to: '/governance', label: 'Governance',   Icon: ShieldCheck, badge: 3 },
+]
+
+const TEAM_ITEMS = [
+  { to: '/teams/team-platform',    label: 'Platform' },
+  { to: '/teams/team-product',     label: 'Product' },
+  { to: '/teams/team-datascience', label: 'Data Science' },
+  { to: '/teams/team-mobile',      label: 'Mobile' },
 ] as const
 
 export function Sidebar() {
+  const navigate = useNavigate()
+  const user = getCurrentUser()
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <aside
       className="
@@ -35,25 +61,88 @@ export function Sidebar() {
       </div>
 
       {/* Nav links */}
-      <nav className="flex-1 py-4 space-y-1 px-2">
-        {NAV_ITEMS.map(({ to, label, Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors
-               ${isActive
-                 ? 'bg-indigo-600 text-white'
-                 : 'text-slate-400 hover:text-slate-50 hover:bg-slate-800'
-               }`
-            }
-            aria-label={label}
-          >
-            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            <span className="hidden xl:block">{label}</span>
-          </NavLink>
-        ))}
+      <nav className="flex-1 py-4 px-2 overflow-y-auto">
+        <div className="space-y-1">
+          {NAV_ITEMS.map(({ to, label, Icon, badge }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors
+                 ${isActive
+                   ? 'bg-indigo-600 text-white'
+                   : 'text-slate-400 hover:text-slate-50 hover:bg-slate-800'
+                 }`
+              }
+              aria-label={badge ? `${label}, ${badge} items` : label}
+            >
+              <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="hidden xl:block flex-1">{label}</span>
+              {badge !== undefined && (
+                <span
+                  className="hidden xl:flex items-center justify-center rounded-full bg-rose-500 text-white text-xs font-semibold px-1.5 min-w-[1.25rem] h-5"
+                  aria-hidden="true"
+                >
+                  {badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </div>
+
+        {/* Teams group */}
+        <div className="mt-6">
+          <p className="hidden xl:block px-2 pb-1 text-xs font-semibold uppercase tracking-widest text-slate-500">
+            Teams
+          </p>
+          <div className="space-y-1">
+            {TEAM_ITEMS.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-colors
+                   ${isActive
+                     ? 'bg-indigo-600 text-white'
+                     : 'text-slate-400 hover:text-slate-50 hover:bg-slate-800'
+                   }`
+                }
+                aria-label={label}
+              >
+                <Users className="h-5 w-5 shrink-0" aria-hidden="true" />
+                <span className="hidden xl:block">{label}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
       </nav>
+
+      {/* User footer */}
+      <div className="shrink-0 border-t border-slate-700 p-3">
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white"
+            aria-label={`${user.name}, ${user.role}`}
+          >
+            {user.initials}
+          </span>
+          <div className="hidden xl:block min-w-0">
+            <p className="truncate text-sm font-medium text-slate-50">{user.name}</p>
+            <p className="truncate text-xs text-slate-400">{user.role}</p>
+            <p className="truncate text-xs text-slate-500">{user.email}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="mt-3 flex w-full items-center justify-center xl:justify-start gap-2 rounded-md px-2 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          aria-label="Log out"
+        >
+          <LogOut className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span className="hidden xl:inline">Log out</span>
+        </button>
+      </div>
     </aside>
   )
 }

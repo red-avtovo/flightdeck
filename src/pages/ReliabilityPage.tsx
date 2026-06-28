@@ -14,7 +14,7 @@ import type { AgentTask, TraceSpan } from '../types'
 
 export default function ReliabilityPage() {
   const { period, teamId, model } = useFilters()
-  const { data, loading } = useMockData(() => getReliabilityMetrics(period), [period, teamId, model])
+  const { data, loading } = useMockData(() => getReliabilityMetrics(period, teamId, model), [period, teamId, model])
   const { data: tasks, loading: tasksLoading } = useMockData(
     () => getTaskList({ period, teamId: teamId ?? undefined, model: model ?? undefined }),
     [period, teamId, model],
@@ -73,10 +73,10 @@ export default function ReliabilityPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="P95 Task Duration" value={kpis.p95TaskDurationMs.value} format="duration" trend={kpis.p95TaskDurationMs.trendPct} />
-        <KpiCard title="Tool Failure Rate" value={kpis.toolFailureRate.value} format="percent" trend={kpis.toolFailureRate.trendPct} />
-        <KpiCard title="Timeout Rate" value={kpis.timeoutRate.value} format="percent" trend={kpis.timeoutRate.trendPct} />
-        <KpiCard title="Env Setup P95" value={kpis.envSetupP95Ms.value} format="duration" trend={kpis.envSetupP95Ms.trendPct} tooltip="P95 of operator-provisioned env_setup spans" />
+        <KpiCard title="P95 Task Duration" value={kpis.p95TaskDurationMs.value} format="duration" trend={kpis.p95TaskDurationMs.trendPct} higherIsBetter={false} />
+        <KpiCard title="Tool Failure Rate" value={kpis.toolFailureRate.value} format="percent" trend={kpis.toolFailureRate.trendPct} higherIsBetter={false} />
+        <KpiCard title="Timeout Rate" value={kpis.timeoutRate.value} format="percent" trend={kpis.timeoutRate.trendPct} higherIsBetter={false} />
+        <KpiCard title="Env Setup P95" value={kpis.envSetupP95Ms.value} format="duration" trend={kpis.envSetupP95Ms.trendPct} tooltip="P95 of operator-provisioned env_setup spans" higherIsBetter={false} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

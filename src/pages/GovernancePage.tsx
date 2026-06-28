@@ -8,7 +8,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 
 export default function GovernancePage() {
   const { period, teamId, model } = useFilters()
-  const { data, loading } = useMockData(() => getGovernanceMetrics(period), [period, teamId, model])
+  const { data, loading } = useMockData(() => getGovernanceMetrics(period, teamId, model), [period, teamId, model])
 
   const EVENT_SERIES = [
     { key: 'policy_block',            label: 'Policy Block',    color: '#f43f5e' },
@@ -38,9 +38,9 @@ export default function GovernancePage() {
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <KpiCard title="Policy Blocks" value={kpis.policyBlocks.value} format="number" trend={kpis.policyBlocks.trendPct} />
-        <KpiCard title="Secrets Detected" value={kpis.secretsDetected.value} format="number" trend={kpis.secretsDetected.trendPct} />
-        <KpiCard title="Human Approvals" value={kpis.humanApprovalsRequired.value} format="number" trend={kpis.humanApprovalsRequired.trendPct} />
+        <KpiCard title="Policy Blocks" value={kpis.policyBlocks.value} format="number" trend={kpis.policyBlocks.trendPct} higherIsBetter={false} />
+        <KpiCard title="Secrets Detected" value={kpis.secretsDetected.value} format="number" trend={kpis.secretsDetected.trendPct} higherIsBetter={false} />
+        <KpiCard title="Human Approvals" value={kpis.humanApprovalsRequired.value} format="number" trend={kpis.humanApprovalsRequired.trendPct} higherIsBetter={false} />
       </div>
 
       <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">

@@ -19,4 +19,6 @@ const TEAMS: TeamMetrics[] = [
 
 export const MultiplePoints: Story = { args: { data: TEAMS } }
 export const SinglePoint:    Story = { args: { data: [TEAMS[0]] } }
+// Selected team highlighted (amber), the rest dimmed — mirrors picking a team in the top-bar filter.
+export const Highlighted:    Story = { args: { data: TEAMS, highlightTeamId: 'team-3' } }
 export const Empty:          Story = { args: { data: [] } }

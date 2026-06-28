@@ -3,26 +3,33 @@ import { render, screen } from '@testing-library/react'
 import { BudgetGauge } from '../BudgetGauge'
 
 describe('BudgetGauge', () => {
-  it('renders 75% when spent=7500 budget=10000', () => {
-    render(<BudgetGauge spentUsd={7500} budgetUsd={10000} />)
-    expect(screen.getByText('75%')).toBeInTheDocument()
+  it('renders the spent percentage', () => {
+    render(<BudgetGauge spentUsd={5000} budgetUsd={10000} />)
+    expect(screen.getByText('50%')).toBeInTheDocument()
   })
 
-  it('does not show danger class at 75%', () => {
+  it('is in the normal (emerald) state below 75%', () => {
+    const { container } = render(<BudgetGauge spentUsd={5000} budgetUsd={10000} />)
+    expect(container.querySelector('[data-state="normal"]')).toBeInTheDocument()
+    expect(screen.queryByText('Approaching budget')).toBeNull()
+    expect(screen.queryByText('Over budget')).toBeNull()
+  })
+
+  it('shows the amber warning state and label between 75% and 90%', () => {
+    const { container } = render(<BudgetGauge spentUsd={8500} budgetUsd={10000} />)
+    expect(container.querySelector('[data-state="warning"]')).toBeInTheDocument()
+    expect(screen.getByText('Approaching budget')).toBeInTheDocument()
+  })
+
+  it('enters the warning state exactly at the 75% threshold', () => {
     const { container } = render(<BudgetGauge spentUsd={7500} budgetUsd={10000} />)
-    const arc = container.querySelector('[data-danger]')
-    expect(arc).toBeNull()
+    expect(container.querySelector('[data-state="warning"]')).toBeInTheDocument()
   })
 
-  it('renders 110% when over budget', () => {
-    render(<BudgetGauge spentUsd={11000} budgetUsd={10000} />)
-    expect(screen.getByText('110%')).toBeInTheDocument()
-  })
-
-  it('shows danger class and "Over budget" text at 110%', () => {
-    render(<BudgetGauge spentUsd={11000} budgetUsd={10000} />)
-    expect(screen.getByText('Over budget')).toBeInTheDocument()
+  it('shows the danger state and "Over budget" text above 90% (FR-04)', () => {
     const { container } = render(<BudgetGauge spentUsd={11000} budgetUsd={10000} />)
-    expect(container.querySelector('[data-danger="true"]')).toBeInTheDocument()
+    expect(screen.getByText('110%')).toBeInTheDocument()
+    expect(screen.getByText('Over budget')).toBeInTheDocument()
+    expect(container.querySelector('[data-state="danger"]')).toBeInTheDocument()
   })
 })

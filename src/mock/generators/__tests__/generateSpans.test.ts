@@ -39,6 +39,23 @@ describe('generateSpans', () => {
     errorSpans.forEach(s => expect(s.errorCategory).toBeTruthy())
   })
 
+  it('completed tasks contain no failing spans', () => {
+    const FAIL = new Set(['error', 'timeout', 'blocked'])
+    const completedIds = new Set(tasks.filter(t => t.status === 'completed').map(t => t.id))
+    const offending = spans.filter(s => completedIds.has(s.taskId) && FAIL.has(s.status))
+    expect(offending).toHaveLength(0)
+  })
+
+  it('every failed task contains at least one failing span', () => {
+    const FAIL = new Set(['error', 'timeout', 'blocked'])
+    const failedIds = tasks.filter(t => t.status === 'failed').map(t => t.id)
+    expect(failedIds.length).toBeGreaterThan(0)
+    failedIds.forEach(id => {
+      const taskSpans = spans.filter(s => s.taskId === id)
+      expect(taskSpans.some(s => FAIL.has(s.status))).toBe(true)
+    })
+  })
+
   it('is deterministic', () => {
     const rng2 = createRng(42)
     const t2 = generateTeams(rng2)

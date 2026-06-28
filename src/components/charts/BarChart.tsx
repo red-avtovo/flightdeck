@@ -3,6 +3,7 @@ import {
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { EmptyState } from '../ui/EmptyState'
+import { ChartTooltip } from './ChartTooltip'
 
 interface Series {
   key: string
@@ -18,9 +19,11 @@ interface BarChartProps {
   xKey?: string
   formatY?: (v: number) => string
   stacked?: boolean
+  /** Set false for whole-count axes so ticks stay integers (e.g. task counts). */
+  allowDecimals?: boolean
 }
 
-export function BarChart({ data, series, height = 240, layout = 'vertical', xKey = 'name', formatY, stacked = false }: BarChartProps) {
+export function BarChart({ data, series, height = 240, layout = 'vertical', xKey = 'name', formatY, stacked = false, allowDecimals = true }: BarChartProps) {
   if (data.length === 0) return <EmptyState />
 
   const isHorizontal = layout === 'horizontal'
@@ -36,16 +39,20 @@ export function BarChart({ data, series, height = 240, layout = 'vertical', xKey
           <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={!isHorizontal} vertical={isHorizontal} />
           {isHorizontal ? (
             <>
-              <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} tickFormatter={formatY} />
+              <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} tickFormatter={formatY} allowDecimals={allowDecimals} />
               <YAxis type="category" dataKey={xKey} tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} width={76} />
             </>
           ) : (
             <>
               <XAxis dataKey={xKey} tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatY} />
+              <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatY} allowDecimals={allowDecimals} />
             </>
           )}
-          <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#f1f5f9' }} formatter={formatY ? (v: number) => [formatY(v)] : undefined} />
+          <Tooltip
+            wrapperStyle={{ outline: 'none' }}
+            cursor={{ fill: '#33415533' }}
+            content={<ChartTooltip formatValue={formatY} />}
+          />
           {series.length > 1 && <Legend />}
           {series.map(s => (
             <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} stackId={stacked ? 'stack' : undefined} radius={series.length === 1 ? [4, 4, 0, 0] : undefined} />

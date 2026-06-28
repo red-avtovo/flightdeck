@@ -10,6 +10,7 @@ interface KpiCardProps {
   sparkline?: TrendPoint[]
   tooltip?: string
   loading?: boolean
+  higherIsBetter?: boolean
 }
 
 function formatValue(value: number, format: KpiCardProps['format']): string {
@@ -21,7 +22,7 @@ function formatValue(value: number, format: KpiCardProps['format']): string {
   }
 }
 
-export function KpiCard({ title, value, format, trend, sparkline = [], tooltip, loading = false }: KpiCardProps) {
+export function KpiCard({ title, value, format, trend, sparkline = [], tooltip, loading = false, higherIsBetter = true }: KpiCardProps) {
   if (loading) {
     return (
       <div
@@ -37,7 +38,9 @@ export function KpiCard({ title, value, format, trend, sparkline = [], tooltip, 
   }
 
   const trendPositive = trend !== null && trend >= 0
-  const trendColor = trendPositive ? 'text-emerald-400' : 'text-rose-400'
+  // isGood: a positive delta is good when higherIsBetter, bad otherwise (XOR inversion)
+  const isGood = trendPositive === higherIsBetter
+  const trendColor = isGood ? 'text-emerald-400' : 'text-rose-400'
 
   return (
     <div

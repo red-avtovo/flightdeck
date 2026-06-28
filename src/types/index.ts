@@ -185,6 +185,15 @@ export interface GovernanceMetrics {
   events: SecurityEvent[]
 }
 
+export interface MemberWithUsage extends User {
+  /** Tasks started by this member in the selected period */
+  taskCount: number
+  /** Fraction of this member's tasks that completed autonomously (0–1) */
+  autonomyRate: number
+  /** Total cost of this member's tasks in USD for the selected period */
+  spendUsd: number
+}
+
 export interface TeamDetail {
   team: Team
   autonomyRate: number
@@ -196,11 +205,14 @@ export interface TeamDetail {
     reliability: Kpi[]
     governance: Kpi[]
   }
-  members: User[]
+  /** Per-member usage stats for self-service insight (not a ranking; FR-07) */
+  members: MemberWithUsage[]
 }
 
 export interface RepoDetail {
   repo: Repo
+  /** Human-readable name of the team that owns this repo */
+  teamName: string
   autonomyRate: number
   taskCount: number
   spendUsd: number

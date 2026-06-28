@@ -5,11 +5,10 @@ import { KpiCard } from '../components/cards/KpiCard'
 import { LineChart } from '../components/charts/LineChart'
 import { BarChart } from '../components/charts/BarChart'
 import { OutcomeTable } from '../components/tables/OutcomeTable'
-import { formatPercent } from '../lib/utils'
 
 export default function OutcomesPage() {
   const { period, teamId, model } = useFilters()
-  const { data, loading } = useMockData(() => getOutcomesMetrics(period), [period, teamId, model])
+  const { data, loading } = useMockData(() => getOutcomesMetrics(period, teamId, model), [period, teamId, model])
 
   const BAND_SERIES = [
     { key: 'autonomous',     label: 'Autonomous',     color: '#10b981' },
@@ -50,26 +49,26 @@ export default function OutcomesPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Merge Rate" value={kpis.mergeRate.value} format="percent" trend={kpis.mergeRate.trendPct} tooltip="Merged PRs ÷ PRs opened by agent" />
-        <KpiCard title="Human Edit Distance" value={kpis.humanEditDistancePct.value / 100} format="percent" trend={kpis.humanEditDistancePct.trendPct} tooltip="Avg human commits/lines after the agent, over total" />
-        <KpiCard title="CI Pass Rate" value={kpis.ciFirstAttemptPassRate.value} format="percent" trend={kpis.ciFirstAttemptPassRate.trendPct} tooltip="Share of agent PRs whose FIRST CI run passed" />
-        <KpiCard title="Revert Rate" value={kpis.revertRate.value} format="percent" trend={kpis.revertRate.trendPct} tooltip="PRs reverted ÷ merged PRs" />
+        <KpiCard title="Merge Rate" value={kpis.mergeRate.value} format="percent" trend={kpis.mergeRate.trendPct} sparkline={kpis.mergeRate.sparkline} tooltip="Merged PRs ÷ PRs opened by agent" />
+        <KpiCard title="Human Edit Distance" value={kpis.humanEditDistancePct.value / 100} format="percent" trend={kpis.humanEditDistancePct.trendPct} sparkline={kpis.humanEditDistancePct.sparkline} tooltip="Avg human commits/lines after the agent, over total" higherIsBetter={false} />
+        <KpiCard title="CI Pass Rate" value={kpis.ciFirstAttemptPassRate.value} format="percent" trend={kpis.ciFirstAttemptPassRate.trendPct} sparkline={kpis.ciFirstAttemptPassRate.sparkline} tooltip="Share of agent PRs whose FIRST CI run passed" />
+        <KpiCard title="Revert Rate" value={kpis.revertRate.value} format="percent" trend={kpis.revertRate.trendPct} sparkline={kpis.revertRate.sparkline} tooltip="PRs reverted ÷ merged PRs" higherIsBetter={false} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Rework trend over time</h2>
-          <LineChart data={editDistanceTrend} series={editDistanceSeries} formatY={v => `${v.toFixed(1)}%`} />
+          <LineChart data={editDistanceTrend} series={editDistanceSeries} formatY={v => `${v.toFixed(1)}%`} trend />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Review comments per PR</h2>
-          <LineChart data={reviewCommentsTrend} series={commentsSeries} formatY={v => v.toFixed(1)} />
+          <LineChart data={reviewCommentsTrend} series={commentsSeries} formatY={v => v.toFixed(1)} trend />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 col-span-full">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Outcome by task type</h2>
-          <BarChart data={outcomeData} series={BAND_SERIES} xKey="name" stacked formatY={v => formatPercent(v)} />
+          <BarChart data={outcomeData} series={BAND_SERIES} xKey="name" stacked formatY={v => `${v}`} allowDecimals={false} />
         </div>
       </div>
 

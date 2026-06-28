@@ -68,7 +68,11 @@ export function generateTasks(
       const costs = TOKEN_COST[model]
       const costUsd = (inputTokens / 1e6) * costs.inputPerM + (outputTokens / 1e6) * costs.outputPerM
       const toolCallCount = rng.nextInt(5, 80)
-      const failedToolCallCount = status === 'failed' ? rng.nextInt(1, 10) : rng.nextInt(0, 3)
+      // Draw unconditionally to keep the RNG sequence stable, then enforce coherence:
+      // a successful task has zero failed tool calls; non-terminal tasks haven't failed yet.
+      const failedToolCallDraw = status === 'failed' ? rng.nextInt(1, 10) : rng.nextInt(0, 3)
+      const failedToolCallCount =
+        status === 'completed' || status === 'queued' || status === 'running' ? 0 : failedToolCallDraw
       const policyBlockCount = rng.nextBool(0.08) ? rng.nextInt(1, 3) : 0
       const humanInterventionRequired = rng.nextBool(0.12)
       const hasPr = status === 'completed' && rng.nextBool(0.85)

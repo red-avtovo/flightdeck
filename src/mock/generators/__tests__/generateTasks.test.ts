@@ -62,6 +62,18 @@ describe('generateTasks', () => {
     nonTerminal.forEach(t => expect(t.autonomyBand).toBeNull())
   })
 
+  it('completed tasks report zero failed tool calls', () => {
+    tasks.filter(t => t.status === 'completed').forEach(t =>
+      expect(t.failedToolCallCount).toBe(0),
+    )
+  })
+
+  it('failed tasks report at least one failed tool call', () => {
+    const failed = tasks.filter(t => t.status === 'failed')
+    expect(failed.length).toBeGreaterThan(0)
+    failed.forEach(t => expect(t.failedToolCallCount).toBeGreaterThanOrEqual(1))
+  })
+
   it('is deterministic', () => {
     const rng2 = createRng(42)
     const t2 = generateTeams(rng2)

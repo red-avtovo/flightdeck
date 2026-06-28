@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import { isAuthenticated } from './session'
 
 export function RequireAuth() {
-  const isAuthenticated = sessionStorage.getItem('authenticated') === 'true'
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />
+  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" replace />
 }

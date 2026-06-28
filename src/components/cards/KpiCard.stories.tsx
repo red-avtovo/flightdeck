@@ -35,3 +35,27 @@ export const Loading: Story = {
 export const ZeroValue: Story = {
   args: { title: 'Revert Rate', value: 0, format: 'percent', trend: null },
 }
+
+export const LowerIsBetter: Story = {
+  name: 'Lower Is Better (worsening — trend should be red)',
+  args: {
+    title: 'Tool Failure Rate',
+    value: 0.082,
+    format: 'percent',
+    trend: 4.3,
+    sparkline: SPARKLINE,
+    higherIsBetter: false,
+  },
+}
+
+export const LowerIsBetterImproving: Story = {
+  name: 'Lower Is Better (improving — trend should be green)',
+  args: {
+    title: 'Revert Rate',
+    value: 0.031,
+    format: 'percent',
+    trend: -2.8,
+    sparkline: SPARKLINE,
+    higherIsBetter: false,
+  },
+}

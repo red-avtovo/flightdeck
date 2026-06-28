@@ -13,6 +13,40 @@ const SECTION_LINKS: Record<string, string> = {
   Governance: '/governance',
 }
 
+type Format = 'number' | 'percent' | 'currency' | 'duration'
+
+const MINI_SECTIONS: Array<{
+  label: string
+  key: 'outcomes' | 'cost' | 'reliability' | 'governance'
+  labels: [string, string]
+  formats: [Format, Format]
+}> = [
+  {
+    label: 'Outcomes',
+    key: 'outcomes',
+    labels: ['Merge Rate', 'Avg Edit Distance'],
+    formats: ['percent', 'percent'],
+  },
+  {
+    label: 'Cost',
+    key: 'cost',
+    labels: ['Cost/Merged PR', 'Token Waste %'],
+    formats: ['currency', 'percent'],
+  },
+  {
+    label: 'Reliability',
+    key: 'reliability',
+    labels: ['P95 Task Duration', 'Tool Failure Rate'],
+    formats: ['duration', 'percent'],
+  },
+  {
+    label: 'Governance',
+    key: 'governance',
+    labels: ['Policy Blocks', 'Secrets Detected'],
+    formats: ['number', 'number'],
+  },
+]
+
 export default function TeamDetailPage() {
   const { teamId = '' } = useParams<{ teamId: string }>()
   const { period } = useFilters()
@@ -31,13 +65,6 @@ export default function TeamDetailPage() {
   }
 
   const { team, autonomyRate, taskCount, spendUsd, sections, members } = data
-
-  const MINI_SECTIONS = [
-    { label: 'Outcomes',    kpis: sections.outcomes,    labels: ['Merge Rate', 'CI Pass Rate'] },
-    { label: 'Cost',        kpis: sections.cost,        labels: ['Total Spend', 'Cost/Task'] },
-    { label: 'Reliability', kpis: sections.reliability, labels: ['P95 Duration', 'Tool Failure Rate'] },
-    { label: 'Governance',  kpis: sections.governance,  labels: ['Policy Blocks', 'Secrets Detected'] },
-  ]
 
   return (
     <div className="space-y-8">
@@ -58,7 +85,7 @@ export default function TeamDetailPage() {
 
       {/* Mini sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {MINI_SECTIONS.map(({ label, kpis, labels }) => (
+        {MINI_SECTIONS.map(({ label, key, labels, formats }) => (
           <div key={label} className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</h2>
@@ -70,8 +97,8 @@ export default function TeamDetailPage() {
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {kpis.map((kpi, i) => (
-                <KpiCard key={i} title={labels[i]} value={kpi.value} format="number" trend={kpi.trendPct} />
+              {sections[key].map((kpi, i) => (
+                <KpiCard key={i} title={labels[i]} value={kpi.value} format={formats[i]} trend={kpi.trendPct} />
               ))}
             </div>
           </div>
@@ -82,9 +109,10 @@ export default function TeamDetailPage() {
       <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
         <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Team members</h2>
         <table className="w-full" aria-label="Members">
+          <caption className="sr-only">Self-service stats — not a ranking</caption>
           <thead className="bg-slate-800">
             <tr>
-              {['Name', 'Email', 'First Active', 'Last Active'].map(h => (
+              {['Member', 'Tasks', 'Autonomy %', 'Spend'].map(h => (
                 <th key={h} className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{h}</th>
               ))}
             </tr>
@@ -93,13 +121,14 @@ export default function TeamDetailPage() {
             {members.map(m => (
               <tr key={m.id} className="hover:bg-slate-800/50">
                 <td className="px-3 py-2 text-sm text-slate-200 font-medium">{m.name}</td>
-                <td className="px-3 py-2 text-sm text-slate-400">{m.email}</td>
-                <td className="px-3 py-2 text-sm text-slate-400">{new Date(m.firstActive).toLocaleDateString()}</td>
-                <td className="px-3 py-2 text-sm text-slate-400">{new Date(m.lastActive).toLocaleDateString()}</td>
+                <td className="px-3 py-2 text-sm text-slate-400 tabular-nums">{m.taskCount}</td>
+                <td className="px-3 py-2 text-sm text-slate-400 tabular-nums">{formatPercent(m.autonomyRate)}</td>
+                <td className="px-3 py-2 text-sm text-slate-400 tabular-nums">{formatCurrency(m.spendUsd)}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        <p className="mt-3 text-xs text-slate-500">Self-service stats — not a ranking</p>
       </div>
     </div>
   )

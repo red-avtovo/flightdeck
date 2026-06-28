@@ -198,6 +198,50 @@ describe('Mock API', () => {
     it('is deterministic', async () => {
       expect(await getOrgOverview('30d')).toEqual(await getOrgOverview('30d'))
     })
+
+    it('team filter scopes tasksStarted below the org-wide total', async () => {
+      const orgWide = await getOrgOverview('30d')
+      const platform = await getOrgOverview('30d', 'team-platform')
+      expect(platform.kpis.tasksStarted.value).toBeGreaterThan(0)
+      expect(platform.kpis.tasksStarted.value).toBeLessThan(orgWide.kpis.tasksStarted.value)
+    })
+
+    it('team filter does not collapse the comparison scatter (stays cross-team)', async () => {
+      const orgWide = await getOrgOverview('30d')
+      const platform = await getOrgOverview('30d', 'team-platform')
+      // Scatter is a cross-team comparison: it ignores the team filter so every team
+      // still plots (the selected team is highlighted in the UI instead).
+      expect(platform.teamScatter).toEqual(orgWide.teamScatter)
+      expect(platform.teamScatter.filter(t => t.taskCount > 0).length).toBeGreaterThan(1)
+    })
+
+    it('model filter still scopes the comparison scatter', async () => {
+      const orgWide = await getOrgOverview('30d')
+      const opus = await getOrgOverview('30d', null, 'claude-opus-4')
+      const orgTotal = orgWide.teamScatter.reduce((s, t) => s + t.taskCount, 0)
+      const opusTotal = opus.teamScatter.reduce((s, t) => s + t.taskCount, 0)
+      expect(opusTotal).toBeGreaterThan(0)
+      expect(opusTotal).toBeLessThan(orgTotal)
+    })
+
+    it('model filter scopes tasksStarted below the org-wide total', async () => {
+      const orgWide = await getOrgOverview('30d')
+      const opus = await getOrgOverview('30d', null, 'claude-opus-4')
+      expect(opus.kpis.tasksStarted.value).toBeGreaterThan(0)
+      expect(opus.kpis.tasksStarted.value).toBeLessThan(orgWide.kpis.tasksStarted.value)
+    })
+
+    it('summing per-model tasksStarted reconstructs the org-wide total', async () => {
+      const orgWide = await getOrgOverview('30d')
+      const models = ['claude-opus-4', 'claude-sonnet-4-6', 'claude-haiku-4-5']
+      const perModel = await Promise.all(models.map(m => getOrgOverview('30d', null, m)))
+      const sum = perModel.reduce((s, m) => s + m.kpis.tasksStarted.value, 0)
+      expect(sum).toBe(orgWide.kpis.tasksStarted.value)
+    })
+
+    it('passing null filters matches the unfiltered overview', async () => {
+      expect(await getOrgOverview('30d', null, null)).toEqual(await getOrgOverview('30d'))
+    })
   })
 
   describe('getOutcomesMetrics', () => {

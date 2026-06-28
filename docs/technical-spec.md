@@ -55,6 +55,7 @@ flightdeck/
 │   │   │   ├── StackedAreaChart.tsx
 │   │   │   ├── BarChart.tsx
 │   │   │   ├── ScatterChart.tsx
+│   │   │   ├── ChartTooltip.tsx      # shared legend-style tooltip (colour swatch + series label + value)
 │   │   │   ├── SparklineChart.tsx
 │   │   │   ├── AutonomyBar.tsx
 │   │   │   └── BudgetGauge.tsx
@@ -76,17 +77,23 @@ flightdeck/
 │   │   │   ├── generateRepos.ts
 │   │   │   ├── generateUsers.ts
 │   │   │   ├── generateTasks.ts     # AgentTask corpus, 90 days
-│   │   │   ├── generateSpans.ts     # TraceSpan per task
+│   │   │   ├── generateSpans.ts     # TraceSpan per task (status-coherent, see note below)
 │   │   │   ├── generatePROutcomes.ts
 │   │   │   └── generateSecurityEvents.ts
 │   │   └── api.ts              # mock API functions with simulated delay
+│   │
+│   │   # Data coherence: a task's trace and counters must match its status —
+│   │   #   • completed task → NO failing spans (env/agent all `ok`) and `failedToolCallCount === 0`
+│   │   #   • failed task    → ≥ 1 failing span (env error, or a forced final agent span) and `failedToolCallCount ≥ 1`
+│   │   # Enforced in generateSpans/generateTasks and guarded by their unit tests.
 │   ├── hooks/
 │   │   ├── useFilters.ts
 │   │   └── useMockData.ts      # generic loading-state wrapper
 │   ├── context/
 │   │   └── FilterContext.tsx
 │   ├── auth/
-│   │   └── RequireAuth.tsx     # sessionStorage guard, redirects to /login
+│   │   ├── RequireAuth.tsx     # sessionStorage guard, redirects to /login
+│   │   └── session.ts          # mock session: CURRENT_USER + login/logout/isAuthenticated
 │   ├── types/
 │   │   └── index.ts
 │   ├── lib/
@@ -253,6 +260,7 @@ interface Kpi { value: number; trendPct: number; sparkline: TrendPoint[] }
 
 // Overview "Alerts strip". Alerts are DERIVED, not stored: high-severity
 // SecurityEvents plus the injected cost-spike anomaly. Returned inline on getOrgOverview.
+// The strip is client-side dismissible and links through to /governance (FR-02).
 interface Alert {
   id: string
   severity: Severity
@@ -327,18 +335,38 @@ interface GovernanceMetrics {
   events: SecurityEvent[]
 }
 
+// Extends User with per-member usage stats for the selected period (FR-07).
+// Presented under the caption "Self-service stats — not a ranking".
+interface MemberWithUsage extends User {
+  taskCount: number    // tasks started by this member in the period
+  autonomyRate: number // 0–1 ratio of this member's tasks that completed autonomously
+  spendUsd: number     // total USD cost of this member's tasks in the period
+}
+
 interface TeamDetail {
   team: Team
   autonomyRate: number
   taskCount: number
   spendUsd: number
-  // 2 key metrics per mini-section (FR-07)
+  // 2 key metrics per mini-section (FR-07):
+  //   outcomes:    Merge Rate (percent) + Avg Edit Distance (percent)
+  //   cost:        Cost/Merged PR (currency) + Token Waste % (percent)
+  //   reliability: P95 Task Duration (duration ms) + Tool Failure Rate (percent)
+  //   governance:  Policy Blocks (number) + Secrets Detected (number)
+  // Each mini-section's "View full →" link navigates to the matching org page
+  // pre-filtered to this team (FR-07), e.g. `/outcomes?team=<teamId>`.
   sections: { outcomes: Kpi[]; cost: Kpi[]; reliability: Kpi[]; governance: Kpi[] }
-  members: User[]
+  members: MemberWithUsage[]  // per-member usage stats (FR-07); not a ranking
 }
 
-interface RepoDetail extends Omit<TeamDetail, 'team' | 'members'> {
-  repo: Repo                             // includes the readiness booleans (FR-08 strip)
+interface RepoDetail {
+  repo: Repo          // includes the readiness booleans (FR-08 strip)
+  teamName: string    // human-readable name of the owning team (e.g. "Product")
+  autonomyRate: number
+  taskCount: number
+  spendUsd: number
+  // Same 2-metric mini-sections as TeamDetail (no member list on repo drill-down)
+  sections: { outcomes: Kpi[]; cost: Kpi[]; reliability: Kpi[]; governance: Kpi[] }
 }
 
 interface TaskFilters {
@@ -378,12 +406,15 @@ interface TaskFilters {
 ```typescript
 // src/mock/api.ts — all return Promise<T> with 100–200ms simulated delay
 
-getOrgOverview(period: Period): Promise<OrgOverview>
+// Org-level metrics accept optional global filters. teamId/model default to
+// undefined/null = "all"; both are threaded through tasksFor()/priorTasksFor()
+// so KPIs, charts, tables, and derived alerts reflect the active filter set.
+getOrgOverview(period: Period, teamId?: string | null, model?: string | null): Promise<OrgOverview>
 getTeamMetrics(period: Period): Promise<TeamMetrics[]>
-getOutcomesMetrics(period: Period): Promise<OutcomesMetrics>
-getCostMetrics(period: Period): Promise<CostMetrics>
-getReliabilityMetrics(period: Period): Promise<ReliabilityMetrics>
-getGovernanceMetrics(period: Period): Promise<GovernanceMetrics>
+getOutcomesMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<OutcomesMetrics>
+getCostMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<CostMetrics>
+getReliabilityMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<ReliabilityMetrics>
+getGovernanceMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<GovernanceMetrics>
 getTeamDetail(teamId: string, period: Period): Promise<TeamDetail>
 getRepoDetail(repoId: string, period: Period): Promise<RepoDetail>
 getTaskList(filters: TaskFilters): Promise<AgentTask[]>
@@ -402,6 +433,9 @@ getSecurityEvents(period: Period): Promise<SecurityEvent[]>
   value={0.421}
   format="percent"
   trend={+3.2}              // % change vs prior period
+  higherIsBetter={true}     // direction-aware trend color (default true);
+                            // when false a rising value is bad → rose, falling → emerald.
+                            // Used for lower-is-better KPIs: cost/duration/error/waste/revert metrics.
   sparkline={timeSeriesPoints}
   tooltip="% of tasks merged with < 20% human edits"
 />
@@ -414,11 +448,28 @@ Slide-over panel. Opens when a task row is clicked in the TaskList. Renders a fl
 Full-width segmented bar. Four segments with labels and percentages. Clicking a segment filters the tasks-over-time chart below to that band only.
 
 ### ScatterChart
-Generic Recharts scatter component (kept generic for reuse beyond teams). On the Overview it renders the team scatter: each dot is a team, labelled. Hover tooltip shows team name, task count, autonomy %. No axis labels implying rank — axis titles are "Task Volume" and "Autonomy Rate". Reference lines at org median for both axes.
+Generic Recharts scatter component (kept generic for reuse beyond teams). On the Overview it renders the team scatter: each dot is a team. No axis labels implying rank — axis titles are "Task Volume" and "Autonomy Rate". A **median cross** (two labelled `ReferenceLine`s at the org median of each axis, "Median volume" / "Median autonomy") splits the teams into four quadrants for pattern reading. A custom hover tooltip shows team name, task volume, autonomy %, and which quadrant the team falls in (e.g. "High volume · low autonomy") — quadrant wording is descriptive, never a ranking.
 
 ### AppShell Layout
-- Sidebar: 240px fixed, icon-only collapse < 1280px, active nav item highlighted
-- TopBar: 64px, org name left, filter pickers (period, team, model) right
+- Sidebar: 240px fixed, icon-only collapse < 1280px, active nav item highlighted.
+  Two nav groups: the primary dashboard links (Overview, Outcomes, Cost,
+  Reliability, Governance — the Governance item carries a count badge for active
+  high-severity events), and a **Teams** group whose links open `/teams/:teamId`.
+  The Teams group is the primary in-app entry point to the FR-07/FR-08 drill-downs
+  (the org-level routes alone are otherwise unreachable from the chrome).
+  The footer shows the signed-in mock user (initials avatar + name/role/email from
+  `auth/session.ts`) and a **Log out** button that calls `logout()` and routes to
+  `/login`; the avatar + logout icon stay reachable in the collapsed (icon-only) state.
+- TopBar: 64px. Current page title on the left, org name shown as a secondary
+  label; global filter pickers on the right. The **Period** filter is a segmented
+  button group (`role="group"` labelled "Time range", one `aria-pressed` button per
+  range), not a dropdown; Team and Model remain `<select>` dropdowns. Per **FR-09**
+  the global Team and Model filters apply only to org-level pages — on drill-down
+  routes (`/teams/:teamId`, `/repos/:repoId`) the TopBar shows the **period button
+  group only**, because drill-downs scope locally and never write back to the global
+  filters. Org pages read `teamId`/`model` from `FilterContext` and pass them into
+  the corresponding `get*Metrics(period, teamId, model)` call so charts re-query when
+  any filter changes.
 - Main: `max-w-7xl mx-auto px-6 py-8`, scrollable
 
 ---
@@ -427,11 +478,11 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
 
 | Chart | Page | Recharts type | Notes |
 |-------|------|---------------|-------|
-| Tasks over time | Overview | AreaChart (stacked) | 4 series by autonomy band |
-| Team scatter | Overview | ScatterChart | Dot per team, no ranking |
-| Edit distance trend | Outcomes | LineChart | Single line |
-| Outcome by task type | Outcomes | BarChart (stacked) | 6 task types on x-axis |
-| Review comments trend | Outcomes | LineChart | Single line |
+| Tasks over time | Overview | AreaChart (stacked) | 4 series by autonomy band; **absolute task counts** on Y (`valueFormat="number"`, the default) |
+| Team scatter | Overview | ScatterChart | Dot per team, no ranking; ignores the team filter (always cross-team), selected team highlighted via `highlightTeamId` |
+| Edit distance trend | Outcomes | LineChart | Single line + dashed trend overlay (`trend` prop) |
+| Outcome by task type | Outcomes | BarChart (stacked) | 6 task types on x-axis; **absolute task counts** (`allowDecimals={false}`), not percentages |
+| Review comments trend | Outcomes | LineChart | Single line + dashed trend overlay (`trend` prop) |
 | Spend over time | Cost | LineChart | Single line |
 | Budget gauge | Cost | Custom SVG arc | Radial, red > 90% |
 | Cost/PR by task type | Cost | BarChart (horizontal) | Signature visual |
@@ -441,7 +492,7 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
 | Security events | Governance | AreaChart (stacked) | 3 event types |
 | Sparklines | KPI cards | Custom inline SVG | No axes, no tooltip |
 
-All Recharts charts use `<ResponsiveContainer width="100%" height={...}>`, custom dark tooltip, consistent 8-color palette from Tailwind config, and an empty state overlay when data is absent.
+All Recharts charts use `<ResponsiveContainer width="100%" height={...}>`, the shared `ChartTooltip` (a dark, legend-style tooltip rendering a colour swatch + series label + formatted value per entry — never a bare number; dashed `__trend_*` overlays are filtered out), consistent 8-color palette from Tailwind config, and an empty state overlay when data is absent.
 
 ---
 
@@ -461,10 +512,15 @@ stories: ['../src/**/*.stories.tsx']
 
 ### Stories Required Per Component
 
+Per **NFR-02**, *every* component in `src/components/` ships at least a Default
+story with all meaningful state variants. The generic chart wrappers (LineChart,
+AreaChart, StackedAreaChart, BarChart) each ship a populated + empty-state story;
+the table below enumerates the additional variants for the stateful components.
+
 | Component | Story variants |
 |-----------|---------------|
-| KpiCard | Default, positive trend, negative trend, loading, zero value |
-| BudgetGauge | 50% normal, 90% warning, 110% over-budget |
+| KpiCard | Default, positive trend, negative trend, lower-is-better (inverted color), loading, zero value |
+| BudgetGauge | Normal (< 75%, emerald fill), warning (75–90%, amber fill, "Approaching budget"), over-budget (> 90%, rose fill, "Over budget") — red > 90% mandated by FR-04 |
 | SparklineChart | With data, flat/empty |
 | AlertBadge | Critical, warning, info, resolved |
 | TeamTable | Populated, empty state, sorted |

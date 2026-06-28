@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { Sidebar } from '../Sidebar'
 
 describe('Sidebar', () => {
-  function setup() {
+  function setup(initialPath = '/overview') {
     return render(
-      <MemoryRouter initialEntries={['/overview']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <MemoryRouter initialEntries={[initialPath]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Sidebar />
       </MemoryRouter>,
     )
@@ -25,10 +26,10 @@ describe('Sidebar', () => {
     expect(screen.getByText('Flightdeck')).toBeInTheDocument()
   })
 
-  it('renders all navigation links', () => {
+  it('renders all navigation links (5 main + 4 team)', () => {
     setup()
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(5)
+    expect(links).toHaveLength(9)
   })
 
   it('renders Overview link with correct href', () => {
@@ -76,5 +77,98 @@ describe('Sidebar', () => {
     expect(links[2]).toHaveAttribute('href', '/cost')
     expect(links[3]).toHaveAttribute('href', '/reliability')
     expect(links[4]).toHaveAttribute('href', '/governance')
+    expect(links[5]).toHaveAttribute('href', '/teams/team-platform')
+    expect(links[6]).toHaveAttribute('href', '/teams/team-product')
+    expect(links[7]).toHaveAttribute('href', '/teams/team-datascience')
+    expect(links[8]).toHaveAttribute('href', '/teams/team-mobile')
+  })
+
+  // Teams nav group
+  it('renders the Teams section label', () => {
+    setup()
+    expect(screen.getByText('Teams')).toBeInTheDocument()
+  })
+
+  it('renders Platform team link with correct href', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /platform/i })
+    expect(link).toHaveAttribute('href', '/teams/team-platform')
+  })
+
+  it('renders Product team link with correct href', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /product/i })
+    expect(link).toHaveAttribute('href', '/teams/team-product')
+  })
+
+  it('renders Data Science team link with correct href', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /data science/i })
+    expect(link).toHaveAttribute('href', '/teams/team-datascience')
+  })
+
+  it('renders Mobile team link with correct href', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /mobile/i })
+    expect(link).toHaveAttribute('href', '/teams/team-mobile')
+  })
+
+  it('activates team link when on that team route', () => {
+    setup('/teams/team-platform')
+    const platformLink = screen.getByRole('link', { name: /platform/i })
+    expect(platformLink).toHaveClass('bg-indigo-600')
+  })
+
+  // Governance badge
+  it('renders a badge count on the Governance link', () => {
+    setup()
+    // The aria-label on the link encodes the count
+    const link = screen.getByRole('link', { name: /governance.*3/i })
+    expect(link).toBeInTheDocument()
+  })
+
+  it('renders the governance badge pill with count 3', () => {
+    setup()
+    expect(screen.getByText('3')).toBeInTheDocument()
+  })
+
+  // User footer
+  it('renders the user initials avatar', () => {
+    setup()
+    expect(screen.getByText('JD')).toBeInTheDocument()
+  })
+
+  it('renders the user name in the footer', () => {
+    setup()
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument()
+  })
+
+  it('renders the user role in the footer', () => {
+    setup()
+    expect(screen.getByText('VP Eng')).toBeInTheDocument()
+  })
+
+  it('user avatar has accessible label', () => {
+    setup()
+    expect(screen.getByLabelText('Jane Doe, VP Eng')).toBeInTheDocument()
+  })
+
+  it('renders the user email in the footer', () => {
+    setup()
+    expect(screen.getByText('jane.doe@acme.example')).toBeInTheDocument()
+  })
+
+  // Logout
+  it('renders a Log out button', () => {
+    setup()
+    expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument()
+  })
+
+  it('clicking Log out drops the auth state', async () => {
+    const user = userEvent.setup()
+    sessionStorage.setItem('authenticated', 'true')
+    setup()
+    await user.click(screen.getByRole('button', { name: 'Log out' }))
+    expect(sessionStorage.getItem('authenticated')).toBeNull()
   })
 })

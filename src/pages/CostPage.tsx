@@ -9,7 +9,7 @@ import { Skeleton } from '../components/ui/Skeleton'
 import { formatCurrency, formatPercent } from '../lib/utils'
 import type { TeamMetrics } from '../types'
 
-const MONTHLY_BUDGET_USD = 50_000
+const MONTHLY_BUDGET_USD = 8_000
 
 function TeamCostSummary({ rows }: { rows: TeamMetrics[] }) {
   const thClass = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400'
@@ -47,7 +47,7 @@ function TeamCostSummary({ rows }: { rows: TeamMetrics[] }) {
 
 export default function CostPage() {
   const { period, teamId, model } = useFilters()
-  const { data, loading } = useMockData(() => getCostMetrics(period), [period, teamId, model])
+  const { data, loading } = useMockData(() => getCostMetrics(period, teamId, model), [period, teamId, model])
 
   if (loading || !data) {
     return (
@@ -81,10 +81,10 @@ export default function CostPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Total Spend" value={kpis.totalSpend.value} format="currency" trend={kpis.totalSpend.trendPct} sparkline={kpis.totalSpend.sparkline} />
-        <KpiCard title="Cost/Task" value={kpis.costPerTask.value} format="currency" trend={kpis.costPerTask.trendPct} />
-        <KpiCard title="Cost/Merged PR" value={kpis.costPerMergedPr.value} format="currency" trend={kpis.costPerMergedPr.trendPct} />
-        <KpiCard title="Token Waste" value={kpis.tokenWastePct.value} format="percent" trend={kpis.tokenWastePct.trendPct} tooltip="Tokens spent on tasks that produced no merged PR" />
+        <KpiCard title="Total Spend" value={kpis.totalSpend.value} format="currency" trend={kpis.totalSpend.trendPct} sparkline={kpis.totalSpend.sparkline} higherIsBetter={false} />
+        <KpiCard title="Cost/Task" value={kpis.costPerTask.value} format="currency" trend={kpis.costPerTask.trendPct} higherIsBetter={false} />
+        <KpiCard title="Cost/Merged PR" value={kpis.costPerMergedPr.value} format="currency" trend={kpis.costPerMergedPr.trendPct} higherIsBetter={false} />
+        <KpiCard title="Token Waste" value={kpis.tokenWastePct.value} format="percent" trend={kpis.tokenWastePct.trendPct} tooltip="Tokens spent on tasks that produced no merged PR" higherIsBetter={false} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

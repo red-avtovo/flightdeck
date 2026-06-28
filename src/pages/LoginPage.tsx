@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom'
+import { login } from '../auth/session'
 
 export default function LoginPage() {
   const navigate = useNavigate()
 
   function handleLogin() {
-    sessionStorage.setItem('authenticated', 'true')
+    login()
     navigate('/overview')
   }
 

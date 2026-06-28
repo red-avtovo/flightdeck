@@ -24,9 +24,19 @@ export function formatDuration(ms: number): string {
     const s = parseFloat(seconds.toFixed(1))
     return s === Math.floor(s) ? `${Math.floor(s)}s` : `${s}s`
   }
-  const m = Math.floor(seconds / 60)
-  const s = Math.round(seconds % 60)
-  return `${m}m ${s}s`
+  const totalMinutes = Math.floor(seconds / 60)
+  if (totalMinutes < 60) {
+    const s = Math.round(seconds % 60)
+    return `${totalMinutes}m ${s}s`
+  }
+  const totalHours = Math.floor(totalMinutes / 60)
+  if (totalHours < 24) {
+    const m = totalMinutes % 60
+    return `${totalHours}h ${m}m`
+  }
+  const days = Math.floor(totalHours / 24)
+  const h = totalHours % 24
+  return `${days}d ${h}h`
 }
 
 export function formatNumber(n: number): string {

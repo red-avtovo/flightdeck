@@ -9,6 +9,9 @@ const meta: Meta<typeof BudgetGauge> = {
 export default meta
 type Story = StoryObj<typeof BudgetGauge>
 
+// Normal: < 75% — arc and value text render in emerald
 export const Normal:     Story = { args: { spentUsd: 5000,  budgetUsd: 10000 } }
-export const Warning:    Story = { args: { spentUsd: 9000,  budgetUsd: 10000 } }
-export const OverBudget: Story = { args: { spentUsd: 11000, budgetUsd: 10000 } }
+// Warning: 75–90% — arc and value text render in amber ("Approaching budget")
+export const Warning:    Story = { args: { spentUsd: 8500,  budgetUsd: 10000 } }
+// OverBudget: > 90% — arc and value text render in rose ("Over budget", per FR-04)
+export const OverBudget: Story = { args: { spentUsd: 9500,  budgetUsd: 10000 } }

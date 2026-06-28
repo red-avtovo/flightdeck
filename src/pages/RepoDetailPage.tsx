@@ -6,6 +6,8 @@ import { KpiCard } from '../components/cards/KpiCard'
 import { Skeleton } from '../components/ui/Skeleton'
 import { formatCurrency, formatPercent } from '../lib/utils'
 
+type Format = 'number' | 'percent' | 'currency' | 'duration'
+
 function ReadinessBadge({ ok, label }: { ok: boolean; label: string }) {
   return (
     <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${ok ? 'border-emerald-700 bg-emerald-950/40 text-emerald-400' : 'border-slate-700 bg-slate-800 text-slate-400'}`}>
@@ -21,6 +23,38 @@ const SECTION_LINKS: Record<string, string> = {
   Reliability:'/reliability',
   Governance: '/governance',
 }
+
+const MINI_SECTIONS: Array<{
+  label: string
+  key: 'outcomes' | 'cost' | 'reliability' | 'governance'
+  labels: [string, string]
+  formats: [Format, Format]
+}> = [
+  {
+    label: 'Outcomes',
+    key: 'outcomes',
+    labels: ['Merge Rate', 'Avg Edit Distance'],
+    formats: ['percent', 'percent'],
+  },
+  {
+    label: 'Cost',
+    key: 'cost',
+    labels: ['Cost/Merged PR', 'Token Waste %'],
+    formats: ['currency', 'percent'],
+  },
+  {
+    label: 'Reliability',
+    key: 'reliability',
+    labels: ['P95 Task Duration', 'Tool Failure Rate'],
+    formats: ['duration', 'percent'],
+  },
+  {
+    label: 'Governance',
+    key: 'governance',
+    labels: ['Policy Blocks', 'Secrets Detected'],
+    formats: ['number', 'number'],
+  },
+]
 
 export default function RepoDetailPage() {
   const { repoId = '' } = useParams<{ repoId: string }>()
@@ -39,14 +73,7 @@ export default function RepoDetailPage() {
     )
   }
 
-  const { repo, autonomyRate, taskCount, spendUsd, sections } = data
-
-  const MINI_SECTIONS = [
-    { label: 'Outcomes',    kpis: sections.outcomes,    labels: ['Merge Rate', 'CI Pass Rate'] },
-    { label: 'Cost',        kpis: sections.cost,        labels: ['Total Spend', 'Cost/Task'] },
-    { label: 'Reliability', kpis: sections.reliability, labels: ['P95 Duration', 'Tool Failure Rate'] },
-    { label: 'Governance',  kpis: sections.governance,  labels: ['Policy Blocks', 'Secrets Detected'] },
-  ]
+  const { repo, teamName, autonomyRate, taskCount, spendUsd, sections } = data
 
   return (
     <div className="space-y-8">
@@ -55,7 +82,7 @@ export default function RepoDetailPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold text-slate-50 font-mono">{repo.name}</h1>
-            <p className="text-sm text-slate-400 mt-1">{repo.teamId}</p>
+            <p className="text-sm text-slate-400 mt-1">Repo drill-down · {teamName} team</p>
           </div>
           <div className="flex gap-6 text-right">
             <div><p className="text-xs text-slate-400">Tasks</p><p className="text-2xl font-bold text-slate-50">{taskCount}</p></div>
@@ -77,7 +104,7 @@ export default function RepoDetailPage() {
 
       {/* Mini sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {MINI_SECTIONS.map(({ label, kpis, labels }) => (
+        {MINI_SECTIONS.map(({ label, key, labels, formats }) => (
           <div key={label} className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</h2>
@@ -86,8 +113,8 @@ export default function RepoDetailPage() {
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {kpis.map((kpi, i) => (
-                <KpiCard key={i} title={labels[i]} value={kpi.value} format="number" trend={kpi.trendPct} />
+              {sections[key].map((kpi, i) => (
+                <KpiCard key={i} title={labels[i]} value={kpi.value} format={formats[i]} trend={kpi.trendPct} />
               ))}
             </div>
           </div>

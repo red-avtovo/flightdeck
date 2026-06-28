@@ -6,6 +6,7 @@ import type {
   ErrorCategory,
   GovernanceMetrics,
   Kpi,
+  MemberWithUsage,
   OrgOverview,
   OutcomesMetrics,
   Period,
@@ -99,18 +100,25 @@ function inPriorPeriod(ts: number, period: Period): boolean {
   return ts >= NOW - 2 * ms && ts < NOW - ms
 }
 
-function tasksFor(period: Period, teamId?: string, repoId?: string): AgentTask[] {
+function tasksFor(period: Period, teamId?: string, repoId?: string, model?: string): AgentTask[] {
   return _tasks.filter(t => {
     const ts = new Date(t.startedAt).getTime()
     if (!inPeriod(ts, period)) return false
     if (teamId !== undefined && t.teamId !== teamId) return false
     if (repoId !== undefined && t.repoId !== repoId) return false
+    if (model !== undefined && t.model !== model) return false
     return true
   })
 }
 
-function priorTasksFor(period: Period): AgentTask[] {
-  return _tasks.filter(t => inPriorPeriod(new Date(t.startedAt).getTime(), period))
+function priorTasksFor(period: Period, teamId?: string, model?: string): AgentTask[] {
+  return _tasks.filter(t => {
+    const ts = new Date(t.startedAt).getTime()
+    if (!inPriorPeriod(ts, period)) return false
+    if (teamId !== undefined && t.teamId !== teamId) return false
+    if (model !== undefined && t.model !== model) return false
+    return true
+  })
 }
 
 function prsForTasks(taskIds: Set<string>): PullRequestOutcome[] {
@@ -204,11 +212,17 @@ export async function getSecurityEvents(period: Period): Promise<SecurityEvent[]
   return _securityEvents.filter(e => new Date(e.createdAt).getTime() >= cutoff)
 }
 
-export async function getOrgOverview(period: Period): Promise<OrgOverview> {
+export async function getOrgOverview(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<OrgOverview> {
   await delay()
 
-  const tasks = tasksFor(period)
-  const prior = priorTasksFor(period)
+  const team = teamId ?? undefined
+  const mdl = model ?? undefined
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const prior = priorTasksFor(period, team, mdl)
   const taskIds = new Set(tasks.map(t => t.id))
   const prs = prsForTasks(taskIds)
   const mergedPrs = prs.filter(pr => pr.status === 'merged')
@@ -301,13 +315,21 @@ export async function getOrgOverview(period: Period): Promise<OrgOverview> {
     return row
   })
 
-  // Team scatter
-  const teamScatter = _teams.map(team => buildTeamMetrics(team, tasks, prs))
+  // Team scatter — a cross-team comparison, so it ignores the team filter (otherwise
+  // selecting one team collapses the other three onto the origin). It still respects
+  // the model filter; the selected team is highlighted in the UI instead.
+  const scatterTasks = tasksFor(period, undefined, undefined, mdl)
+  const scatterPrs = prsForTasks(new Set(scatterTasks.map(t => t.id)))
+  const teamScatter = _teams.map(team => buildTeamMetrics(team, scatterTasks, scatterPrs))
 
-  // Alerts from critical security events
+  // Alerts from critical security events. When a team/model filter is active,
+  // scope alerts to the filtered task set so they stay coherent with the charts.
+  const filtersActive = team !== undefined || mdl !== undefined
   const criticalEvents = _securityEvents.filter(e => {
     const ts = new Date(e.createdAt).getTime()
-    return inPeriod(ts, period) && e.severity === 'critical'
+    if (!inPeriod(ts, period) || e.severity !== 'critical') return false
+    if (filtersActive && !taskIds.has(e.taskId)) return false
+    return true
   })
   const alerts: Alert[] = criticalEvents.slice(0, 20).map(e => ({
     id: `alert-${e.id}`,
@@ -337,11 +359,17 @@ export async function getOrgOverview(period: Period): Promise<OrgOverview> {
   return { autonomyBreakdown, kpis, tasksOverTime, teamScatter, alerts }
 }
 
-export async function getOutcomesMetrics(period: Period): Promise<OutcomesMetrics> {
+export async function getOutcomesMetrics(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<OutcomesMetrics> {
   await delay()
 
-  const tasks = tasksFor(period)
-  const prior = priorTasksFor(period)
+  const team = teamId ?? undefined
+  const mdl = model ?? undefined
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const prior = priorTasksFor(period, team, mdl)
   const taskIds = new Set(tasks.map(t => t.id))
   const prs = prsForTasks(taskIds)
   const mergedPrs = prs.filter(pr => pr.status === 'merged')
@@ -441,11 +469,17 @@ export async function getOutcomesMetrics(period: Period): Promise<OutcomesMetric
   return { kpis, editDistanceTrend, outcomeByTaskType, reviewCommentsTrend, prOutcomes }
 }
 
-export async function getCostMetrics(period: Period): Promise<CostMetrics> {
+export async function getCostMetrics(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<CostMetrics> {
   await delay()
 
-  const tasks = tasksFor(period)
-  const prior = priorTasksFor(period)
+  const team = teamId ?? undefined
+  const mdl = model ?? undefined
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const prior = priorTasksFor(period, team, mdl)
   const taskIds = new Set(tasks.map(t => t.id))
   const prs = prsForTasks(taskIds)
   const mergedPrs = prs.filter(pr => pr.status === 'merged')
@@ -503,11 +537,17 @@ export async function getCostMetrics(period: Period): Promise<CostMetrics> {
   return { kpis, spendTrend, budgetBurnPct, costPerMergedPrByTaskType, teamBreakdown }
 }
 
-export async function getReliabilityMetrics(period: Period): Promise<ReliabilityMetrics> {
+export async function getReliabilityMetrics(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<ReliabilityMetrics> {
   await delay()
 
-  const tasks = tasksFor(period)
-  const prior = priorTasksFor(period)
+  const team = teamId ?? undefined
+  const mdl = model ?? undefined
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const prior = priorTasksFor(period, team, mdl)
   const taskIds = new Set(tasks.map(t => t.id))
   const priorIds = new Set(prior.map(t => t.id))
   const spans = _spans.filter(s => taskIds.has(s.taskId))
@@ -632,11 +672,17 @@ export async function getReliabilityMetrics(period: Period): Promise<Reliability
   return { kpis, durationTrend, errorRateByCategory, toolPerformance }
 }
 
-export async function getGovernanceMetrics(period: Period): Promise<GovernanceMetrics> {
+export async function getGovernanceMetrics(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<GovernanceMetrics> {
   await delay()
 
-  const tasks = tasksFor(period)
-  const prior = priorTasksFor(period)
+  const team = teamId ?? undefined
+  const mdl = model ?? undefined
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const prior = priorTasksFor(period, team, mdl)
   const taskIds = new Set(tasks.map(t => t.id))
   const priorIds = new Set(prior.map(t => t.id))
 
@@ -712,26 +758,44 @@ export async function getTeamDetail(teamId: string, period: Period): Promise<Tea
     .map(t => new Date(t.completedAt!).getTime() - new Date(t.startedAt).getTime())
     .sort((a, b) => a - b)
 
+  // Avg edit distance stored as 0–100; normalise to 0–1 for the percent KpiCard format
+  const avgEditDistance = prs.length > 0
+    ? prs.reduce((s, p) => s + p.humanEditDistancePct, 0) / prs.length / 100
+    : 0
+
   const sections: TeamDetail['sections'] = {
+    // Outcomes: Merge Rate (percent) + Avg Edit Distance (percent)
     outcomes: [
       { value: prs.length > 0 ? mergedPrs.length / prs.length : 0, trendPct: null, sparkline: [] },
-      { value: rate, trendPct: null, sparkline: [] },
-      { value: prs.length > 0 ? prs.filter(p => p.ciFirstAttemptPassed).length / prs.length : 0, trendPct: null, sparkline: [] },
+      { value: avgEditDistance, trendPct: null, sparkline: [] },
     ],
+    // Cost: Cost/Merged PR (currency) + Token Waste % (percent)
     cost: [
-      { value: spend, trendPct: null, sparkline: [] },
-      { value: tasks.length > 0 ? spend / tasks.length : 0, trendPct: null, sparkline: [] },
+      { value: mergedPrs.length > 0 ? spend / mergedPrs.length : 0, trendPct: null, sparkline: [] },
       { value: tokenWastePct(tasks), trendPct: null, sparkline: [] },
     ],
+    // Reliability: P95 Task Duration (duration ms) + Tool Failure Rate (percent)
     reliability: [
       { value: durations.length > 0 ? percentile(durations, 95) : 0, trendPct: null, sparkline: [] },
       { value: spans.length > 0 ? errSpans.length / spans.length : 0, trendPct: null, sparkline: [] },
     ],
+    // Governance: Policy Blocks (number) + Secrets Detected (number)
     governance: [
       { value: govEvents.filter(e => e.type === 'policy_block').length, trendPct: null, sparkline: [] },
-      { value: govEvents.filter(e => e.type === 'human_approval_required').length, trendPct: null, sparkline: [] },
+      { value: govEvents.filter(e => e.type === 'secret_detected').length, trendPct: null, sparkline: [] },
     ],
   }
+
+  // Per-member usage stats derived from tasks in the selected period
+  const membersWithUsage: MemberWithUsage[] = members.map(m => {
+    const memberTasks = tasks.filter(t => t.userId === m.id)
+    return {
+      ...m,
+      taskCount: memberTasks.length,
+      autonomyRate: autonomyRateOf(memberTasks),
+      spendUsd: totalSpend(memberTasks),
+    }
+  })
 
   return {
     team,
@@ -739,7 +803,7 @@ export async function getTeamDetail(teamId: string, period: Period): Promise<Tea
     taskCount: tasks.length,
     spendUsd: spend,
     sections,
-    members,
+    members: membersWithUsage,
   }
 }
 
@@ -747,6 +811,9 @@ export async function getRepoDetail(repoId: string, period: Period): Promise<Rep
   await delay()
 
   const repo = _repos.find(r => r.id === repoId)!
+  const owningTeam = _teams.find(t => t.id === repo.teamId)
+  const teamName = owningTeam?.name ?? repo.teamId
+
   const tasks = tasksFor(period, undefined, repoId)
   const taskIds = new Set(tasks.map(t => t.id))
   const prs = prsForTasks(taskIds)
@@ -764,27 +831,37 @@ export async function getRepoDetail(repoId: string, period: Period): Promise<Rep
     .map(t => new Date(t.completedAt!).getTime() - new Date(t.startedAt).getTime())
     .sort((a, b) => a - b)
 
+  // Avg edit distance stored as 0–100; normalise to 0–1 for the percent KpiCard format
+  const avgEditDistance = prs.length > 0
+    ? prs.reduce((s, p) => s + p.humanEditDistancePct, 0) / prs.length / 100
+    : 0
+
   const sections: RepoDetail['sections'] = {
+    // Outcomes: Merge Rate (percent) + Avg Edit Distance (percent)
     outcomes: [
       { value: prs.length > 0 ? mergedPrs.length / prs.length : 0, trendPct: null, sparkline: [] },
-      { value: rate, trendPct: null, sparkline: [] },
-      { value: prs.length > 0 ? prs.filter(p => p.ciFirstAttemptPassed).length / prs.length : 0, trendPct: null, sparkline: [] },
+      { value: avgEditDistance, trendPct: null, sparkline: [] },
     ],
+    // Cost: Cost/Merged PR (currency) + Token Waste % (percent)
     cost: [
-      { value: spend, trendPct: null, sparkline: [] },
-      { value: tasks.length > 0 ? spend / tasks.length : 0, trendPct: null, sparkline: [] },
+      { value: mergedPrs.length > 0 ? spend / mergedPrs.length : 0, trendPct: null, sparkline: [] },
+      { value: tokenWastePct(tasks), trendPct: null, sparkline: [] },
     ],
+    // Reliability: P95 Task Duration (duration ms) + Tool Failure Rate (percent)
     reliability: [
       { value: durations.length > 0 ? percentile(durations, 95) : 0, trendPct: null, sparkline: [] },
       { value: spans.length > 0 ? errSpans.length / spans.length : 0, trendPct: null, sparkline: [] },
     ],
+    // Governance: Policy Blocks (number) + Secrets Detected (number)
     governance: [
       { value: govEvents.filter(e => e.type === 'policy_block').length, trendPct: null, sparkline: [] },
+      { value: govEvents.filter(e => e.type === 'secret_detected').length, trendPct: null, sparkline: [] },
     ],
   }
 
   return {
     repo,
+    teamName,
     autonomyRate: rate,
     taskCount: tasks.length,
     spendUsd: spend,

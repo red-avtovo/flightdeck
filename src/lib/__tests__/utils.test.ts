@@ -22,6 +22,9 @@ describe('formatDuration', () => {
   it('shows seconds for 1000–59999ms', () => expect(formatDuration(1500)).toBe('1.5s'))
   it('shows minutes and seconds', () => expect(formatDuration(90000)).toBe('1m 30s'))
   it('shows whole seconds', () => expect(formatDuration(2000)).toBe('2s'))
+  it('rolls up to hours and minutes past an hour', () => expect(formatDuration(3_900_000)).toBe('1h 5m'))
+  it('rolls up to days and hours past a day', () => expect(formatDuration(97_368_000)).toBe('1d 3h'))
+  it('keeps minutes below an hour', () => expect(formatDuration(3_540_000)).toBe('59m 0s'))
 })
 
 describe('formatNumber', () => {
