@@ -55,7 +55,7 @@ function buildDataset(profile: ScenarioProfile) {
   const rawTasks = generateTasks(rng, teams, repos, users, profile)
   const spans = generateSpans(rng, rawTasks, profile)
   const prOutcomes = generatePROutcomes(rng, rawTasks, repos, profile)
-  const securityEvents = generateSecurityEvents(rng, rawTasks, teams, profile)
+  const securityEvents = generateSecurityEvents(rng, rawTasks, repos, profile)
 
   const prByTaskId = new Map<string, PullRequestOutcome>(prOutcomes.map(pr => [pr.taskId, pr]))
 

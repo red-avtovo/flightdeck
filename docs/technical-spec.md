@@ -171,6 +171,7 @@ interface Repo {
   testCommandDetected: boolean
   ciConfigured: boolean
   agentInstructionsPresent: boolean
+  protected: boolean          // production-tier; governance events here escalate in severity
 }
 
 interface User {
@@ -245,10 +246,19 @@ interface SecurityEvent {
   taskId: string
   repoId: string
   teamId: string
-  severity: Severity
+  severity: Severity   // DERIVED (see below), not random
   type: SecurityEventType
   createdAt: string
 }
+
+// Severity is derived from category + repo tier via a per-category rule table in
+// generateSecurityEvents (`SEVERITY_RULES`). The 3 severities are fixed; new
+// categories slot into the table (unmapped → `info`):
+//   secret_detected         → critical on a protected repo, else warning
+//   policy_block            → warning on a protected repo, else info
+//   human_approval_required → warning on a protected repo, else info (never critical)
+// ⇒ critical = a secret exposed on a protected (production) repo. That set is exactly
+//   what `buildOrgAlerts` surfaces as Overview alerts / the sidebar badge.
 
 // ============================================================
 // Aggregate / response types — returned by the mock API (§5).

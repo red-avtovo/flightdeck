@@ -23,6 +23,8 @@ export interface Repo {
   testCommandDetected: boolean
   ciConfigured: boolean
   agentInstructionsPresent: boolean
+  /** Production-tier repo — governance events here escalate in severity. */
+  protected: boolean
 }
 
 export interface User {

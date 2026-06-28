@@ -88,6 +88,11 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 ### FR-06: Governance & Audit (`/governance`)
 - **KPI cards (4):** Critical Alerts, Policy Blocks (count + rate), Secrets Detected, Human Approvals Required. **Critical Alerts** is the count of critical security events in the period — the same number shown in the Overview alerts strip and the sidebar badge — so a warning seen on the Overview is findable here.
 - **Chart:** Security events over time — stacked area (policy_block / secret_detected / human_approval_required)
+- **Severity** is **derived from the event category and where it happened** (a repo's `protected`/production tier), never random. The three severities are fixed even as categories grow:
+  - **critical** — a real exposure that can reach production: a **secret detected on a protected repo**. These are the alerts surfaced on the Overview / sidebar badge.
+  - **warning** — a contained event worth review: a **policy block**, a **secret on a non-protected repo**, or a **human approval on a protected repo**.
+  - **info** — routine, expected activity: a **policy block or human approval on a non-protected repo**.
+  - A human approval is therefore *never* critical (a working gate is not an incident) — it is `info` for a standard repo and `warning` for a protected one. New categories default to `info` until classified.
 - **Event log:** Filterable by type. Columns: severity badge / type / task ID / repo / timestamp. No individual user column. A row can be **deep-linked from an Overview alert** (`/governance?event=<id>`) — the target row is scrolled into view and highlighted.
 
 ### FR-07: Team Drill-Down (`/teams/:teamId`)

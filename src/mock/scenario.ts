@@ -29,8 +29,8 @@ export interface ScenarioProfile {
   /** Span failure probabilities (only ever applied to failed tasks). */
   envFailProb: number
   transientFailProb: number
-  /** P(a security event is critical) — drives the alert count. */
-  criticalEventProb: number
+  /** P(a task produces a governance/security event). Severity is then derived, not random. */
+  securityEventProb: number
 }
 
 const HEALTHY: ScenarioProfile = {
@@ -54,7 +54,7 @@ const HEALTHY: ScenarioProfile = {
   ciMergedPassProb: 0.97,
   envFailProb: 0.1,
   transientFailProb: 0.08,
-  criticalEventProb: 0.08,
+  securityEventProb: 0.1,
 }
 
 // The original pessimistic distribution — useful to show how the dashboard reads
@@ -80,7 +80,7 @@ const PROBLEMATIC: ScenarioProfile = {
   ciMergedPassProb: 0.9,
   envFailProb: 0.15,
   transientFailProb: 0.12,
-  criticalEventProb: 0.15,
+  securityEventProb: 0.18,
 }
 
 export const SCENARIOS: Record<Scenario, { label: string; profile: ScenarioProfile }> = {
