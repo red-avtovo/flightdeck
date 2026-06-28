@@ -27,11 +27,11 @@ export function StackedAreaChart({ data, series, height = 240, valueFormat = 'nu
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#3a3530" />
           <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} />
           <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} tickFormatter={formatValue} />
           <Tooltip
-            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#f1f5f9' }}
+            contentStyle={{ backgroundColor: '#252220', border: '1px solid #3a3530', borderRadius: 8, color: '#f1f5f9' }}
             formatter={(value: number) => formatValue(value)}
           />
           <Legend />

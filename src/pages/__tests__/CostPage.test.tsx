@@ -31,4 +31,12 @@ describe('CostPage', () => {
       expect(screen.getByText('Platform')).toBeInTheDocument()
     }, { timeout: 1000 })
   })
+
+  it('renders page title as sr-only to avoid duplication with TopBar', async () => {
+    renderPage()
+    await waitFor(() => {
+      const heading = screen.getByRole('heading', { name: 'Cost & Efficiency' })
+      expect(heading).toHaveClass('sr-only')
+    }, { timeout: 1000 })
+  })
 })

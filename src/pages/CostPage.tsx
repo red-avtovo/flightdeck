@@ -76,7 +76,8 @@ export default function CostPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold text-slate-50 mb-1">Cost & Efficiency</h1>
+        {/* Title is sr-only: the TopBar already shows it visibly; keep the h1 for a11y/heading order. */}
+        <h1 className="sr-only">Cost & Efficiency</h1>
         <p className="text-sm text-slate-400">Are we spending wisely on agent tasks?</p>
       </div>
 

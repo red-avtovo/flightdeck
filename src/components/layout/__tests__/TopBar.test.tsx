@@ -181,4 +181,16 @@ describe('TopBar', () => {
     expect(screen.getByRole('group', { name: /time range/i })).toBeInTheDocument()
     expect(screen.queryAllByRole('combobox')).toHaveLength(0)
   })
+
+  it('aligns the three controls on a shared height (Period group + Team/Model pills)', () => {
+    setup()
+    // All three actionable controls must share one height token so they line up;
+    // the Team/Model pills previously rendered shorter than the Period group.
+    const periodGroup = screen.getByRole('group', { name: /time range/i })
+    const teamPill = screen.getByRole('combobox', { name: /team/i }).closest('div.rounded-full')
+    const modelPill = screen.getByRole('combobox', { name: /model/i }).closest('div.rounded-full')
+    expect(periodGroup).toHaveClass('h-9')
+    expect(teamPill).toHaveClass('h-9')
+    expect(modelPill).toHaveClass('h-9')
+  })
 })

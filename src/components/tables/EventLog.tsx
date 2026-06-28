@@ -33,7 +33,7 @@ export function EventLog({ events, loading = false }: EventLogProps) {
         <label htmlFor="event-filter" className="text-xs text-slate-400">Filter:</label>
         <select
           id="event-filter"
-          className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
           value={filter}
           onChange={e => setFilter(e.target.value as Filter)}
         >

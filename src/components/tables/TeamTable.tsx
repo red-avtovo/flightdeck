@@ -66,7 +66,7 @@ export function TeamTable({ rows, loading = false }: TeamTableProps) {
             sorted.map(row => (
               <tr key={row.teamId} className="hover:bg-slate-800/50 transition-colors">
                 <td className={`${tdClass} font-medium`}>
-                  <Link to={`/teams/${row.teamId}`} className="text-indigo-400 hover:text-indigo-300">
+                  <Link to={`/teams/${row.teamId}`} className="text-orange-400 hover:text-orange-300">
                     {row.teamName}
                   </Link>
                 </td>

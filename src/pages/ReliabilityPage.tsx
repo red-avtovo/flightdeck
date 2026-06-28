@@ -68,7 +68,7 @@ export default function ReliabilityPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold text-slate-50 mb-1">Reliability & Traces</h1>
+        <h1 className="sr-only">Reliability & Traces</h1>
         <p className="text-sm text-slate-400">Are agents healthy? Where do they fail and why?</p>
       </div>
 
@@ -86,8 +86,9 @@ export default function ReliabilityPage() {
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Error rate by category</h2>
-          <LineChart data={errorRateByCategory} series={errorSeries} formatY={v => formatPercent(v)} />
+          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Errors by category</h2>
+          {/* Absolute error counts per category per day (not a rate); format as integers */}
+          <LineChart data={errorRateByCategory} series={errorSeries} formatY={v => String(Math.round(v))} />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">

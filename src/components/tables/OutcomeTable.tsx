@@ -58,7 +58,12 @@ export function OutcomeTable({ rows, loading = false }: OutcomeTableProps) {
   }
 
   const thClass = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400'
-  const tdClass = 'px-3 py-2 text-sm text-slate-300'
+  // No text color here on purpose: numeric cells add their own traffic-light color
+  // via rateColor(). Two `text-*` color utilities on one element tie on specificity,
+  // so the winner is decided by stylesheet order — and `slate` is a custom (extended)
+  // color now, emitted after emerald/amber/rose, so a base `text-slate-300` would
+  // override the rate color and gray out every number. Apply the slate color per-cell.
+  const tdClass = 'px-3 py-2 text-sm'
 
   return (
     <div className="overflow-x-auto rounded-lg border border-slate-700">
@@ -82,7 +87,7 @@ export function OutcomeTable({ rows, loading = false }: OutcomeTableProps) {
           ) : (
             sorted.map((row, i) => (
               <tr key={i} className="hover:bg-slate-800/50 transition-colors">
-                <td className={tdClass}>{row.repoId}</td>
+                <td className={`${tdClass} text-slate-300`}>{row.repoId}</td>
                 <td className={tdClass}>
                   <span className={`${badge} ${TASK_TYPE_BADGE[row.taskType]}`}>
                     {row.taskType.replace(/_/g, ' ')}

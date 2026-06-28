@@ -3,6 +3,7 @@ import {
   Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { EmptyState } from '../ui/EmptyState'
+import { ChartTooltip } from './ChartTooltip'
 
 interface AreaChartProps {
   data: any[]
@@ -25,10 +26,11 @@ export function AreaChart({ data, dataKey, color = '#6366f1', height = 240, form
               <stop offset="95%" stopColor={color} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#3a3530" />
           <XAxis dataKey="date" tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} />
           <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatY} />
-          <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: 8, color: '#f1f5f9' }} />
+          {/* Reuse shared tooltip formatter so values aren't raw floats — tooltip and axis use the same formatter. */}
+          <Tooltip content={<ChartTooltip formatValue={formatY} />} />
           <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} fill={`url(#grad-${dataKey})`} dot={false} />
         </ReAreaChart>
       </ResponsiveContainer>

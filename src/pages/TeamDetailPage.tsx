@@ -91,7 +91,7 @@ export default function TeamDetailPage() {
               <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</h2>
               <Link
                 to={`${SECTION_LINKS[label]}?team=${teamId}`}
-                className="text-xs text-indigo-400 hover:text-indigo-300"
+                className="text-xs text-orange-400 hover:text-orange-300"
               >
                 View full →
               </Link>

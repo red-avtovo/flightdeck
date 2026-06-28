@@ -55,7 +55,7 @@ export function SpanDrawer({ open, taskId, spans, onClose, loading = false }: Sp
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="rounded-md p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
             aria-label="Close span drawer"
           >
             ✕

@@ -52,7 +52,7 @@ export default function OverviewPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold text-slate-50 mb-1">Organization Overview</h1>
+        <h1 className="sr-only">Organization Overview</h1>
         <p className="text-sm text-slate-400">Are agents producing accepted output autonomously, at a reasonable cost?</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function OverviewPage() {
           ))}
           <Link
             to="/governance"
-            className="ml-auto text-xs text-indigo-400 hover:text-indigo-300 transition-colors whitespace-nowrap"
+            className="ml-auto text-xs text-orange-400 hover:text-orange-300 transition-colors whitespace-nowrap"
           >
             View in Governance →
           </Link>

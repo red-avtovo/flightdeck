@@ -68,7 +68,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **KPI cards (4):** Total Spend, Cost/Task, Cost/Merged PR, Token Waste %
   - **Token Waste %** = tokens spent on work that produced no accepted output ÷ total tokens. "Wasted" tokens = tokens from terminal tasks that did **not** result in a merged PR (failed / cancelled / PR closed-unmerged) **plus** tokens from tasks whose PR was later `reverted`. Tokens from successful merged PRs are never counted as waste.
 - **Charts:**
-  - Spend over time (line)
+  - Spend over time (area, Y-axis formatted as currency with ≤2 decimals; hover tooltip shares the same formatter so values display as dollars, e.g. `$14.09`)
   - Budget burn gauge (radial — emerald when normal, amber warning at ≥ 75%, turns red at > 90%)
   - Cost/merged PR by task type (horizontal bar — e.g., "bug_fix: $18, feature: $74, docs: $12")
 - **Table:** Team cost breakdown — team / spend / tasks / cost per task / cost per merged PR / waste %. Sortable.
@@ -79,7 +79,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
   - **Env Setup P95** = P95 of `env_setup` span duration. These spans do **not** come from agent observability — they originate from the **Agent Operator** (the provisioning layer that deploys environments) and are merged into the task trace with `source: 'operator'`
 - **Charts:**
   - Task duration P50/P95 trend (multi-line)
-  - Error rate by category trend (**multi-line — one line per error category**; required, not a single aggregate line)
+  - Errors by category trend (**multi-line — one line per error category**; shows absolute error counts per category, not a percentage/rate; required, not a single aggregate line)
   - **Tool reliability leaderboard** (horizontal bar) — tools ranked by error rate, most-broken first. This is a *tool* leaderboard, not a team/engineer ranking (those remain out of scope)
 - **Tool performance table:** tool type / call count / error rate / P50 latency / P95 latency (aggregated from `TraceSpan` grouped by span type)
 - **Task list:** Recent tasks, filterable by status (completed / failed / blocked)
@@ -106,6 +106,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **All three filters are functional**: Team and Model are threaded into every org-level metric query (`getOrgOverview`, `getOutcomesMetrics`, `getCostMetrics`, `getReliabilityMetrics`, `getGovernanceMetrics`) so KPIs, charts, tables, and derived alerts all reflect the active filter set. Passing `null` for Team/Model means "all"
 - Team and Model selectors are hidden on drill-down pages (those scope by their route param); the Period button group remains
 - Drill-down pages scope locally and do not write back to global filters
+- The three controls (Period group, Team pill, Model pill) share one control height so they sit on a single aligned row
 
 ---
 
@@ -138,8 +139,9 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 ### NFR-05: Usability
 - Progressive disclosure: KPIs first, charts second, tables/detail on demand
 - Every page answers exactly one primary question
-- Dark mode first
+- Dark mode first — warm dark theme (near-black warm neutrals, orange brand accent); see §5 for the design palette
 - Mobile-responsive down to 768px (minimum supported width; per-breakpoint behavior defined in Technical Spec §10 "Responsive Behavior")
+- Page title shown once in the TopBar; org page `<h1>` elements are screen-reader only (`sr-only`) to avoid visual duplication while maintaining heading structure
 
 ### NFR-06: Data
 - All data mocked via deterministic seeded service (seed: 42)
@@ -153,7 +155,60 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 
 ---
 
-## 5. Out of Scope
+## 5. Design Palette
+
+The Flightdeck UI uses a **warm dark theme** derived from the reference desktop task-app design. The brand accent is **orange**; the neutral scale is warm (brownish-black, not cool slate-blue). This section is the source of truth for all colour decisions; the Technical Spec §10 maps these roles to concrete Tailwind tokens.
+
+### 5.1 Semantic Role → Hex
+
+| Role | Hex | Notes |
+|------|-----|-------|
+| `background` | `#1a1714` | Deepest app background (window chrome, sidebar rail) |
+| `surface` | `#201e1b` | Primary panel / sidebar content area |
+| `surface-elevated` | `#252220` | Cards, dropdowns, table rows, drawer overlays |
+| `border` | `#3a3530` | Dividers, card outlines, input strokes |
+| `text-primary` | `#f0ece6` | Headlines, KPI values, active nav labels |
+| `text-secondary` | `#a89f96` | Body copy, table cell text |
+| `text-muted` | `#6b6460` | Labels, section headings, placeholder text |
+| `brand` | `#f97316` | Orange accent — flower logo, active task icon, primary CTA |
+| `brand-light` | `#fb923c` | Hover state, soft brand tint |
+| `brand-dark` | `#ea6c00` | Pressed state, darker brand emphasis |
+| `success` | `#22c55e` | Completed-task checkmarks, positive trend indicators |
+| `warning` | `#f59e0b` | Amber — budget approaching limit, the "Auto" preset star |
+| `error` | `#ef4444` | Failed tasks, over-budget gauge, critical alerts |
+| `info` | `#6366f1` | Blue/indigo secondary icon accent, info-severity badges |
+
+### 5.2 Autonomy Band Colours
+
+These remain semantically fixed and continue to use their current roles; only the neutral scale around them changes:
+
+| Band | Colour | Hex |
+|------|--------|-----|
+| Autonomous | emerald-500 | `#10b981` |
+| Human-assisted | sky-500 | `#0ea5e9` |
+| Human-rescued | amber-500 | `#f59e0b` |
+| Failed | rose-500 | `#f43f5e` |
+
+### 5.3 Chart Series Palette (8 colours)
+
+A warm-harmonised 8-colour categorical palette for multi-series charts. Series are assigned in order 1→8:
+
+| Token | Hex | Character |
+|-------|-----|-----------|
+| chart-1 | `#f97316` | Orange — brand |
+| chart-2 | `#22c55e` | Green |
+| chart-3 | `#6366f1` | Indigo |
+| chart-4 | `#f59e0b` | Amber |
+| chart-5 | `#ef4444` | Red |
+| chart-6 | `#a78bfa` | Violet |
+| chart-7 | `#14b8a6` | Teal |
+| chart-8 | `#fb7185` | Rose |
+
+Autonomy-band series always use the fixed `autonomy-*` colours above, not this chart rotation.
+
+---
+
+## 6. Out of Scope
 
 - Real API / database integration
 - Real SSO / token validation

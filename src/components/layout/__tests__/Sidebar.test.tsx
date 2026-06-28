@@ -62,10 +62,10 @@ describe('Sidebar', () => {
     expect(link).toHaveAttribute('href', '/governance')
   })
 
-  it('highlights the active link with indigo background', () => {
+  it('highlights the active link with orange background', () => {
     setup()
     const overviewLink = screen.getByRole('link', { name: /overview/i })
-    expect(overviewLink).toHaveClass('bg-indigo-600')
+    expect(overviewLink).toHaveClass('bg-orange-600')
   })
 
   it('renders navigation links in the correct order', () => {
@@ -116,7 +116,7 @@ describe('Sidebar', () => {
   it('activates team link when on that team route', () => {
     setup('/teams/team-platform')
     const platformLink = screen.getByRole('link', { name: /platform/i })
-    expect(platformLink).toHaveClass('bg-indigo-600')
+    expect(platformLink).toHaveClass('bg-orange-600')
   })
 
   // Governance badge

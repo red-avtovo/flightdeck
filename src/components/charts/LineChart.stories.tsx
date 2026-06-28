@@ -41,6 +41,24 @@ export const MultiLine: Story = {
   },
 }
 
+export const Counts: Story = {
+  args: {
+    data: DATES.map((date, i) => ({
+      date,
+      tool_error: 3 + i * 2,
+      timeout: 1 + i,
+      env_setup: 2 + Math.round(Math.sin(i) * 2),
+    })),
+    series: [
+      { key: 'tool_error', label: 'Tool Error', color: '#6366f1' },
+      { key: 'timeout', label: 'Timeout', color: '#f43f5e' },
+      { key: 'env_setup', label: 'Env Setup', color: '#f59e0b' },
+    ],
+    height: 260,
+    formatY: (v: number) => String(Math.round(v)),
+  },
+}
+
 export const Empty: Story = {
   args: {
     data: [],

@@ -36,7 +36,7 @@ export function BarChart({ data, series, height = 240, layout = 'vertical', xKey
           layout={isHorizontal ? 'vertical' : 'horizontal'}
           margin={{ top: 4, right: 4, bottom: 4, left: isHorizontal ? 80 : 4 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" horizontal={!isHorizontal} vertical={isHorizontal} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#3a3530" horizontal={!isHorizontal} vertical={isHorizontal} />
           {isHorizontal ? (
             <>
               <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} tickFormatter={formatY} allowDecimals={allowDecimals} />
@@ -50,7 +50,7 @@ export function BarChart({ data, series, height = 240, layout = 'vertical', xKey
           )}
           <Tooltip
             wrapperStyle={{ outline: 'none' }}
-            cursor={{ fill: '#33415533' }}
+            cursor={{ fill: '#3a353033' }}
             content={<ChartTooltip formatValue={formatY} />}
           />
           {series.length > 1 && <Legend />}

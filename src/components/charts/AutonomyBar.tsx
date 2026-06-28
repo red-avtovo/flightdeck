@@ -28,7 +28,7 @@ export function AutonomyBar({ breakdown, onBandClick, activeBand }: AutonomyBarP
           return (
             <button
               key={key}
-              className={`${color} transition-opacity ${activeBand && activeBand !== key ? 'opacity-40' : 'opacity-100'} focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              className={`${color} transition-opacity ${activeBand && activeBand !== key ? 'opacity-40' : 'opacity-100'} focus:outline-none focus:ring-2 focus:ring-orange-500`}
               style={{ width: `${breakdown[key] * 100}%` }}
               onClick={() => onBandClick?.(activeBand === key ? null : key)}
               aria-label={`${label}: ${pct}%`}

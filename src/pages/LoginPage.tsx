@@ -14,7 +14,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Org logo placeholder */}
         <div className="flex justify-center mb-8">
-          <div className="h-12 w-12 rounded-xl bg-indigo-600 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-xl bg-orange-600 flex items-center justify-center">
             <span className="text-white text-xl font-bold" aria-hidden>⬡</span>
           </div>
         </div>
@@ -31,7 +31,7 @@ export default function LoginPage() {
               id="email"
               type="email"
               placeholder="you@acme.example"
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
               autoComplete="email"
             />
           </div>
@@ -39,7 +39,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleLogin}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 active:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+            className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-500 active:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
           >
             Continue with Okta
           </button>

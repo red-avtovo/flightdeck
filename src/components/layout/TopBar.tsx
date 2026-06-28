@@ -39,15 +39,20 @@ function isDrillDown(pathname: string): boolean {
 }
 
 const selectClass =
-  'rounded bg-transparent text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+  'rounded bg-transparent text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500'
 
 interface FilterPillProps {
   children: React.ReactNode
 }
 
 function FilterPill({ children }: FilterPillProps) {
+  // h-9 matches the Period button group's height so all three top-bar controls
+  // line up. The pills are otherwise shorter: their height came from a single
+  // py-1 around a short native <select>, while the Period group stacks the
+  // container's p-1 on top of its buttons' py-1. A shared height token keeps the
+  // row aligned regardless of each control's intrinsic content height.
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800 px-3 py-1">
+    <div className="flex h-9 items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800 px-3">
       {children}
     </div>
   )
@@ -73,7 +78,8 @@ export function TopBar() {
         <div
           role="group"
           aria-label="Time range"
-          className="flex items-center gap-1 rounded-full border border-slate-700 bg-slate-800 p-1"
+          // h-9 is the shared control height; the Team/Model pills match it (see FilterPill).
+          className="flex h-9 items-center gap-1 rounded-full border border-slate-700 bg-slate-800 p-1"
         >
           <span className="px-2 text-xs font-medium text-slate-400" aria-hidden="true">
             Period
@@ -84,9 +90,9 @@ export function TopBar() {
               type="button"
               aria-pressed={period === p}
               onClick={() => setPeriod(p)}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+              className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                 period === p
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-orange-600 text-white'
                   : 'text-slate-300 hover:bg-slate-700 hover:text-slate-50'
               }`}
             >

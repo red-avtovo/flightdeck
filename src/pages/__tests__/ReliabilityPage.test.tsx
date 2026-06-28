@@ -16,6 +16,13 @@ describe('ReliabilityPage', () => {
     }, { timeout: 1000 })
   })
 
+  it('renders Errors by category chart heading', async () => {
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText(/Errors by category/i)).toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
   it('renders tool performance table with at least 4 rows', async () => {
     renderPage()
     await waitFor(() => {

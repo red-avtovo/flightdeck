@@ -469,7 +469,13 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
   group only**, because drill-downs scope locally and never write back to the global
   filters. Org pages read `teamId`/`model` from `FilterContext` and pass them into
   the corresponding `get*Metrics(period, teamId, model)` call so charts re-query when
-  any filter changes.
+  any filter changes. The Period group and the Team/Model `FilterPill`s all carry a
+  shared `h-9` height (with `items-center`) so the three controls align on one row —
+  without it each height is intrinsic (the Period group's stacked `p-1` + button
+  `py-1` made it taller than the single-`py-1` pills around shorter `<select>`s).
+  **Note on page headings:** org pages render their page title as an `sr-only` `<h1>`
+  because the TopBar shows it visibly, avoiding a duplicate while preserving heading
+  structure for screen readers and accessibility compliance.
 - Main: `max-w-7xl mx-auto px-6 py-8`, scrollable
 
 ---
@@ -483,11 +489,11 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
 | Edit distance trend | Outcomes | LineChart | Single line + dashed trend overlay (`trend` prop) |
 | Outcome by task type | Outcomes | BarChart (stacked) | 6 task types on x-axis; **absolute task counts** (`allowDecimals={false}`), not percentages |
 | Review comments trend | Outcomes | LineChart | Single line + dashed trend overlay (`trend` prop) |
-| Spend over time | Cost | LineChart | Single line |
-| Budget gauge | Cost | Custom SVG arc | Radial, red > 90% |
+| Spend over time | Cost | AreaChart | Single series, Y-axis formatted as currency; tooltip reuses formatter |
+| Budget gauge | Cost | Custom SVG arc | Radial, red > 90%; arc sized so the percentage sits centered inside the bowl, with the state label (e.g. "Over budget") tucked above the number rather than below it |
 | Cost/PR by task type | Cost | BarChart (horizontal) | Signature visual |
 | Task duration P50/P95 | Reliability | LineChart (2 lines) | |
-| Error rate by category | Reliability | LineChart (multi-line) | One line per error category (6) |
+| Errors by category | Reliability | LineChart (multi-line) | One line per error category (6); Y-axis shows absolute error counts per day (not a percentage/rate); integer formatter |
 | Tool reliability leaderboard | Reliability | BarChart (horizontal) | Tools ranked by error rate, most-broken first |
 | Security events | Governance | AreaChart (stacked) | 3 event types |
 | Sparklines | KPI cards | Custom inline SVG | No axes, no tooltip |
@@ -579,39 +585,101 @@ GitHub Pages is served from the **GitHub Actions artifact** (Pages source = "Git
 
 ## 10. Design System
 
-### Color Palette
+> **Source of truth for palette roles and hexes: Requirements Spec §5.** This section documents the concrete Tailwind token mapping so the implementer's job is mechanical.
+
+### Color Palette — Warm Dark Theme
+
+The previous cool-slate / indigo palette has been replaced with a warm near-black neutral scale and an orange brand accent, matching the reference design. The implementation strategy is:
+
+1. **Override the `slate` color scale** in `tailwind.config.ts` → `theme.extend.colors.slate` with warm-neutral hexes. This lets all existing `text-slate-*`, `bg-slate-*`, and `border-slate-*` utility classes in the codebase adopt the warm palette automatically, with zero component edits.
+2. **Remap custom surface/border tokens** to their warm equivalents.
+3. **Shift the brand from `indigo-*` to `orange-*`** by overriding `theme.extend.colors` for the brand token (or extending the orange scale where indigo steps were previously used).
+
+#### Warm-Neutral `slate` Override (slate-50 → slate-950)
+
+Each step replaces its cool-gray Tailwind default with a warm brownish-neutral. Steps follow the same perceptual lightness ladder as the Tailwind slate scale:
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `slate-50` | `#faf6f2` | Highest-contrast text on dark surfaces |
+| `slate-100` | `#f0ece6` | `text-primary` — headlines, KPI values |
+| `slate-200` | `#e2dbd3` | Emphasized secondary text |
+| `slate-300` | `#c8bfb5` | Body copy (`text-sm text-slate-300`) |
+| `slate-400` | `#a89f96` | `text-secondary` / section labels |
+| `slate-500` | `#8a8078` | Mid-tone muted text |
+| `slate-600` | `#6b6460` | `text-muted` — placeholders, captions |
+| `slate-700` | `#504a45` | Subtle borders, dividers |
+| `slate-800` | `#3a3530` | `border` token — card outlines, input strokes |
+| `slate-850` | `#2e2a26` | (non-standard step; use explicitly if needed) |
+| `slate-900` | `#252220` | `surface-elevated` — cards, dropdowns |
+| `slate-925` | `#201e1b` | `surface` — primary panels, sidebar |
+| `slate-950` | `#1a1714` | `background` — deepest app bg, window chrome |
+
+> Note: Tailwind's default scale has no `slate-850` or `slate-925` steps. These can be added as additional named tokens in `theme.extend.colors` if needed, or the nearest standard step can be used.
+
+#### Custom Token Mapping (`tailwind.config.ts` → `theme.extend.colors`)
+
+| Token key | Hex | Replaces |
+|-----------|-----|---------|
+| `surface` | `#201e1b` | was `#0f172a` (slate-900 cool) |
+| `surface-elevated` | `#252220` | was `#1e293b` (slate-800 cool) |
+| `border` | `#3a3530` | was `#334155` (slate-700 cool) |
+
+#### Brand: Orange replaces Indigo
+
+All `indigo-*` brand uses (primary CTA, active nav highlight, chart-1, `primary` color) shift to the orange scale. Map indigo steps to orange equivalents:
+
+| Previous (indigo) | New (orange) | Hex | Role |
+|-------------------|-------------|-----|------|
+| `indigo-400` | `brand-light` | `#fb923c` | Hover, soft brand tint |
+| `indigo-500` | `brand` / `orange-500` | `#f97316` | Primary brand, active states, chart-1 |
+| `indigo-600` | `brand-dark` | `#ea6c00` | Pressed, darker emphasis |
+
+Add to `theme.extend.colors`:
 ```
-autonomy-autonomous:  emerald-500
-autonomy-assisted:    sky-500
-autonomy-rescued:     amber-500
-autonomy-failed:      rose-500
-primary:              indigo-500
-surface:              slate-900
-surface-elevated:     slate-800
-border:               slate-700
-text-primary:         slate-50
-text-muted:           slate-400
+brand:       '#f97316'
+brand-light: '#fb923c'
+brand-dark:  '#ea6c00'
 ```
 
-### Chart Series Palette
-The "consistent 8-color palette" referenced in §7 for multi-series charts (categorical, assigned in order):
-```
-chart-1:              indigo-500
-chart-2:              emerald-500
-chart-3:              sky-500
-chart-4:              amber-500
-chart-5:              rose-500
-chart-6:              violet-500
-chart-7:              teal-500
-chart-8:              fuchsia-500
-```
-Autonomy-band series always use the fixed `autonomy-*` colors above, not this rotation.
+#### Autonomy Band Colors (unchanged)
+
+| Token | Hex |
+|-------|-----|
+| `autonomy-autonomous` | `#10b981` (emerald-500) |
+| `autonomy-assisted` | `#0ea5e9` (sky-500) |
+| `autonomy-rescued` | `#f59e0b` (amber-500) |
+| `autonomy-failed` | `#f43f5e` (rose-500) |
+
+#### Chart Series Palette (8 tokens)
+
+Replace the previous indigo-led series with the warm-harmonised palette from Requirements Spec §5.3:
+
+| Token | Hex | Replaces |
+|-------|-----|---------|
+| `chart-1` | `#f97316` | was `#6366f1` (indigo-500) |
+| `chart-2` | `#22c55e` | was `#10b981` (emerald-500) — unchanged value |
+| `chart-3` | `#6366f1` | was `#0ea5e9` (sky-500) |
+| `chart-4` | `#f59e0b` | was `#f59e0b` (amber-500) — unchanged |
+| `chart-5` | `#ef4444` | was `#f43f5e` (rose-500) |
+| `chart-6` | `#a78bfa` | was `#8b5cf6` (violet-500) |
+| `chart-7` | `#14b8a6` | was `#14b8a6` (teal-500) — unchanged |
+| `chart-8` | `#fb7185` | was `#e879f9` (fuchsia-500) |
+
+#### Semantic State Colors
+
+| Role | Hex | Tailwind equivalent |
+|------|-----|-------------------|
+| `success` | `#22c55e` | green-500 |
+| `warning` | `#f59e0b` | amber-500 |
+| `error` | `#ef4444` | red-500 |
+| `info` | `#6366f1` | indigo-500 |
 
 ### Typography
 - Font: Inter (bundled via `@fontsource/inter`)
 - KPI values: `text-3xl font-bold tabular-nums`
-- Section labels: `text-xs font-medium uppercase tracking-wider text-slate-400`
-- Body: `text-sm text-slate-300`
+- Section labels: `text-xs font-medium uppercase tracking-wider text-slate-400` (renders as warm muted gray `#a89f96` after override)
+- Body: `text-sm text-slate-300` (renders as warm `#c8bfb5` after override)
 - i18n/l10n: out of scope — English only, no translation layer, no locale switching
 
 ### Layout Grid

@@ -28,32 +28,29 @@ export function BudgetGauge({ spentUsd, budgetUsd }: BudgetGaugeProps) {
   const styles = STATE_STYLES[state]
   const displayPct = Math.round(pct * 100)
 
-  const cx = 80
-  const cy = 80
-  const r = 64
-  const strokeWidth = 12
+  // Arc sized so the big percentage sits inside the bowl with breathing room — a
+  // tighter radius made the number collide with the arc on every side.
+  const cx = 90
+  const cy = 90
+  const r = 78
+  const strokeWidth = 14
   const circumference = Math.PI * r
-  // Half-circle arc (top half)
+  // Half-circle arc (top half). cy = r + strokeWidth/2 keeps the round cap inside the viewBox.
   const filled = Math.min(pct, 1) * circumference
+  const arc = `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`
 
   return (
     <div
-      className="flex flex-col items-center"
+      className="relative flex flex-col items-center"
       role="img"
       aria-label={`Budget gauge: ${displayPct}% of budget used (${state})`}
     >
-      <svg width={160} height={100} viewBox="0 0 160 100">
+      <svg width={180} height={97} viewBox="0 0 180 97">
         {/* Track */}
-        <path
-          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
-          fill="none"
-          stroke="#1e293b"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
+        <path d={arc} fill="none" stroke="#252220" strokeWidth={strokeWidth} strokeLinecap="round" />
         {/* Filled arc */}
         <path
-          d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+          d={arc}
           fill="none"
           stroke={styles.arc}
           strokeWidth={strokeWidth}
@@ -62,14 +59,17 @@ export function BudgetGauge({ spentUsd, budgetUsd }: BudgetGaugeProps) {
           data-state={state}
         />
       </svg>
-      <div className="-mt-6 text-center">
-        <p className={`text-3xl font-bold tabular-nums ${styles.text}`}>
-          {displayPct}%
+      {/* The percentage sits low — resting at the base of the bowl — and stays put across
+          states. The optional state label is tucked ABOVE it in the upper part of the arch
+          rather than below, where it used to crowd the arc's legs. */}
+      {styles.label && (
+        <p className={`absolute inset-x-0 top-[28px] text-center text-xs font-medium ${styles.text}`}>
+          {styles.label}
         </p>
-        {styles.label && (
-          <p className={`text-xs font-medium mt-0.5 ${styles.text}`}>{styles.label}</p>
-        )}
-      </div>
+      )}
+      <p className={`absolute inset-x-0 top-[53px] text-center text-3xl font-bold tabular-nums ${styles.text}`}>
+        {displayPct}%
+      </p>
     </div>
   )
 }

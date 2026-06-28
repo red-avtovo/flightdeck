@@ -17,7 +17,7 @@ export const WithData: Story = {
       { date: '2026-06-15', value: 0.38 },
       { date: '2026-06-22', value: 0.43 },
     ],
-    className: 'text-indigo-400',
+    className: 'text-orange-400',
   },
 }
 

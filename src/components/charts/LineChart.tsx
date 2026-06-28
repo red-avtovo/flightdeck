@@ -60,7 +60,7 @@ export function LineChart({ data, series, height = 240, xKey = 'date', className
     <div className={`w-full ${className}`} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <ReLineChart data={chartData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#3a3530" />
           <XAxis dataKey={xKey} tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} />
           <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} tickLine={false} axisLine={false} tickFormatter={formatY} />
           <Tooltip

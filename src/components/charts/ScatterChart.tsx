@@ -65,7 +65,7 @@ export function ScatterChart({ data, height = 300, highlightTeamId = null }: Sca
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <ReScatterChart margin={{ top: 16, right: 24, bottom: 24, left: 16 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#252220" />
           <XAxis
             type="number"
             dataKey="x"

@@ -44,7 +44,7 @@ export default function OutcomesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold text-slate-50 mb-1">Outcomes & Quality</h1>
+        <h1 className="sr-only">Outcomes & Quality</h1>
         <p className="text-sm text-slate-400">Is agent output being accepted with minimal human rework?</p>
       </div>
 

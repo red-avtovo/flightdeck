@@ -108,7 +108,7 @@ export default function RepoDetailPage() {
           <div key={label} className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</h2>
-              <Link to={`${SECTION_LINKS[label]}?repo=${repoId}`} className="text-xs text-indigo-400 hover:text-indigo-300">
+              <Link to={`${SECTION_LINKS[label]}?repo=${repoId}`} className="text-xs text-orange-400 hover:text-orange-300">
                 View full →
               </Link>
             </div>
