@@ -146,6 +146,16 @@ describe('Mock API', () => {
       expect(ov.autonomyBreakdown).toHaveProperty('failed')
     })
 
+    it('reflects a healthy fleet — successes dominate, failures are a minority', async () => {
+      // The mock data is intentionally optimistic (demo should look like the product works).
+      const ov = await getOrgOverview('30d')
+      const b = ov.autonomyBreakdown
+      expect(b.autonomous).toBeGreaterThan(b.failed)         // autonomous beats failed
+      expect(b.autonomous).toBeGreaterThan(b.human_assisted) // and is the largest band
+      expect(b.failed).toBeLessThan(0.2)                     // failures well under a fifth
+      expect(ov.kpis.autonomyRate.value).toBeGreaterThan(0.4)
+    })
+
     it('has all 5 required KPIs', async () => {
       const ov = await getOrgOverview('30d')
       expect(ov.kpis).toHaveProperty('tasksStarted')
@@ -336,6 +346,12 @@ describe('Mock API', () => {
     it('p95TaskDurationMs is positive', async () => {
       const m = await getReliabilityMetrics('30d')
       expect(m.kpis.p95TaskDurationMs.value).toBeGreaterThan(0)
+    })
+
+    it('tool failure and timeout rates are low (healthy fleet)', async () => {
+      const m = await getReliabilityMetrics('30d')
+      expect(m.kpis.toolFailureRate.value).toBeLessThan(0.05)
+      expect(m.kpis.timeoutRate.value).toBeLessThan(0.05)
     })
 
     it('durationTrend has period-length entries with p50 and p95', async () => {

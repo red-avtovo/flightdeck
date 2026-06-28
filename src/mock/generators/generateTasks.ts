@@ -12,7 +12,8 @@ const TOKEN_COST: Record<string, { inputPerM: number; outputPerM: number }> = {
 }
 
 const ALL_STATUSES: TaskStatus[] = ['completed', 'cancelled', 'failed', 'queued', 'running']
-const STATUS_WEIGHTS = [0.70, 0.15, 0.10, 0.03, 0.02]
+// Healthy fleet: the vast majority of tasks complete; cancellations/failures are rare.
+const STATUS_WEIGHTS = [0.93, 0.015, 0.015, 0.02, 0.02]
 
 function weightedPick<T>(rng: Rng, items: readonly T[], weights: number[]): T {
   const r = rng.next()
@@ -73,9 +74,9 @@ export function generateTasks(
       const failedToolCallDraw = status === 'failed' ? rng.nextInt(1, 10) : rng.nextInt(0, 3)
       const failedToolCallCount =
         status === 'completed' || status === 'queued' || status === 'running' ? 0 : failedToolCallDraw
-      const policyBlockCount = rng.nextBool(0.08) ? rng.nextInt(1, 3) : 0
-      const humanInterventionRequired = rng.nextBool(0.12)
-      const hasPr = status === 'completed' && rng.nextBool(0.85)
+      const policyBlockCount = rng.nextBool(0.04) ? rng.nextInt(1, 3) : 0
+      const humanInterventionRequired = rng.nextBool(0.05)
+      const hasPr = status === 'completed' && rng.nextBool(0.98)
       const prId = (hasPr && !isNonTerminal) ? `pr-${idCounter}` : null
 
       tasks.push({

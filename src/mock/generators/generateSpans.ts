@@ -34,7 +34,7 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
 
     // env_setup span (from operator). Provisioning only fails for a failed task.
     const envDuration = Math.round(rng.logNormal(Math.log(8000), 0.4))
-    const envFailed = isFailed && rng.nextBool(0.15)
+    const envFailed = isFailed && rng.nextBool(0.10)
     spans.push({
       id: `span-${idCounter++}`,
       taskId: task.id,
@@ -60,7 +60,7 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
       const duration = Math.round(rng.logNormal(Math.log(15000), 0.7))
 
       const isFinalFailure = i === failIndex
-      const isTransientFailure = isFailed && !isFinalFailure && rng.nextBool(0.12)
+      const isTransientFailure = isFailed && !isFinalFailure && rng.nextBool(0.08)
       const status: SpanStatus = (isFinalFailure || isTransientFailure)
         ? failureStatus(rng, type)
         : 'ok'
