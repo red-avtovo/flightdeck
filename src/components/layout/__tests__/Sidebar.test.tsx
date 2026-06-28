@@ -25,6 +25,13 @@ describe('Sidebar', () => {
     expect(sidebar.tagName).toBe('ASIDE')
   })
 
+  it('centers nav icons in the collapsed rail (justify-center until xl)', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /overview/i })
+    expect(link.className).toContain('justify-center')
+    expect(link.className).toContain('xl:justify-start')
+  })
+
   it('displays the Flightdeck logo and wordmark', () => {
     setup()
     expect(screen.getByText('⬡')).toBeInTheDocument()
@@ -33,7 +40,8 @@ describe('Sidebar', () => {
 
   it('renders all navigation links (5 main + 4 team)', () => {
     setup()
-    const links = screen.getAllByRole('link')
+    // Scope to <nav>: the footer utility links (GitHub/Storybook) live outside it.
+    const links = within(screen.getByRole('navigation')).getAllByRole('link')
     expect(links).toHaveLength(9)
   })
 
@@ -135,6 +143,20 @@ describe('Sidebar', () => {
     })
     expect(link).toBeInTheDocument()
     expect(within(link).getByText(String(expected))).toBeInTheDocument()
+  })
+
+  // Utility links above the footer
+  it('links to the GitHub repo', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /github repository/i })
+    expect(link).toHaveAttribute('href', 'https://github.com/red-avtovo/flightdeck')
+    expect(link).toHaveAttribute('target', '_blank')
+  })
+
+  it('links to Storybook (under the app base path)', () => {
+    setup()
+    const link = screen.getByRole('link', { name: /storybook/i })
+    expect(link.getAttribute('href')).toMatch(/storybook\/$/)
   })
 
   // User footer
