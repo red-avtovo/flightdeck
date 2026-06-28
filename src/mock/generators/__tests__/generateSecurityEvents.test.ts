@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRng } from '../../seed'
+import { SCENARIOS } from '../../scenario'
 import { generateTeams } from '../generateTeams'
 import { generateRepos } from '../generateRepos'
 import { generateUsers } from '../generateUsers'
@@ -11,8 +12,8 @@ describe('generateSecurityEvents', () => {
   const teams = generateTeams(rng)
   const repos = generateRepos(rng, teams)
   const users = generateUsers(rng, teams)
-  const tasks = generateTasks(rng, teams, repos, users)
-  const events = generateSecurityEvents(rng, tasks, teams)
+  const tasks = generateTasks(rng, teams, repos, users, SCENARIOS.healthy.profile)
+  const events = generateSecurityEvents(rng, tasks, teams, SCENARIOS.healthy.profile)
 
   it('includes all three event types', () => {
     const types = new Set(events.map(e => e.type))
@@ -35,7 +36,7 @@ describe('generateSecurityEvents', () => {
     const t2 = generateTeams(rng2)
     const r2 = generateRepos(rng2, t2)
     const u2 = generateUsers(rng2, t2)
-    const tasks2 = generateTasks(rng2, t2, r2, u2)
-    expect(generateSecurityEvents(rng2, tasks2, t2)).toEqual(events)
+    const tasks2 = generateTasks(rng2, t2, r2, u2, SCENARIOS.healthy.profile)
+    expect(generateSecurityEvents(rng2, tasks2, t2, SCENARIOS.healthy.profile)).toEqual(events)
   })
 })

@@ -1,9 +1,15 @@
 import type { Rng } from '../seed'
+import type { ScenarioProfile } from '../scenario'
 import type { AgentTask, SecurityEvent, SecurityEventType, Severity, Team } from '../../types'
 
 const EVENT_TYPES: SecurityEventType[] = ['policy_block', 'secret_detected', 'human_approval_required']
 
-export function generateSecurityEvents(rng: Rng, tasks: AgentTask[], _teams: Team[]): SecurityEvent[] {
+export function generateSecurityEvents(
+  rng: Rng,
+  tasks: AgentTask[],
+  _teams: Team[],
+  profile: ScenarioProfile,
+): SecurityEvent[] {
   const events: SecurityEvent[] = []
   let idCounter = 1
 
@@ -20,7 +26,7 @@ export function generateSecurityEvents(rng: Rng, tasks: AgentTask[], _teams: Tea
     // near-spike policy blocks critical so the alerts panel/badge stay populated.
     const severity: Severity = isNearSpike && type === 'policy_block'
       ? 'critical'
-      : rng.nextBool(0.08)
+      : rng.nextBool(profile.criticalEventProb)
       ? 'critical'
       : rng.nextBool(0.4)
       ? 'warning'

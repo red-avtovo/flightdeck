@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRng } from '../../seed'
+import { SCENARIOS } from '../../scenario'
 import { generateTeams } from '../generateTeams'
 import { generateRepos } from '../generateRepos'
 import { generateUsers } from '../generateUsers'
@@ -10,7 +11,7 @@ describe('generateTasks', () => {
   const teams = generateTeams(rng)
   const repos = generateRepos(rng, teams)
   const users = generateUsers(rng, teams)
-  const tasks = generateTasks(rng, teams, repos, users)
+  const tasks = generateTasks(rng, teams, repos, users, SCENARIOS.healthy.profile)
 
   it('returns between 800 and 1500 tasks', () => {
     expect(tasks.length).toBeGreaterThanOrEqual(800)
@@ -79,6 +80,6 @@ describe('generateTasks', () => {
     const t2 = generateTeams(rng2)
     const r2 = generateRepos(rng2, t2)
     const u2 = generateUsers(rng2, t2)
-    expect(generateTasks(rng2, t2, r2, u2)).toEqual(tasks)
+    expect(generateTasks(rng2, t2, r2, u2, SCENARIOS.healthy.profile)).toEqual(tasks)
   })
 })

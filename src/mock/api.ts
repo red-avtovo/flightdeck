@@ -35,47 +35,99 @@ import { generateTasks } from './generators/generateTasks'
 import { generateSpans } from './generators/generateSpans'
 import { generatePROutcomes } from './generators/generatePROutcomes'
 import { generateSecurityEvents } from './generators/generateSecurityEvents'
+import { SCENARIOS, DEFAULT_SCENARIO, type Scenario, type ScenarioProfile } from './scenario'
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MONTHLY_BUDGET_USD = 50_000
 const NOW = new Date('2026-06-27T00:00:00Z').getTime()
 
-// ─── Pre-generation (runs once at module load) ────────────────────────────────
+// ─── Scenario-driven dataset ──────────────────────────────────────────────────
+// The whole dataset is generated from one seed (42), but a scenario "profile" tunes
+// the probabilities so we can present a healthy or a problematic fleet. Datasets are
+// cached per scenario; setScenario() swaps the active one (the sidebar toggle).
 
-const _rng = createRng(42)
-const _teams = generateTeams(_rng)
-const _repos = generateRepos(_rng, _teams)
-const _users = generateUsers(_rng, _teams)
-const _rawTasks = generateTasks(_rng, _teams, _repos, _users)
-const _spans = generateSpans(_rng, _rawTasks)
-const _prOutcomes = generatePROutcomes(_rng, _rawTasks, _repos)
-const _securityEvents = generateSecurityEvents(_rng, _rawTasks, _teams)
+function buildDataset(profile: ScenarioProfile) {
+  const rng = createRng(42)
+  const teams = generateTeams(rng)
+  const repos = generateRepos(rng, teams)
+  const users = generateUsers(rng, teams)
+  const rawTasks = generateTasks(rng, teams, repos, users, profile)
+  const spans = generateSpans(rng, rawTasks, profile)
+  const prOutcomes = generatePROutcomes(rng, rawTasks, repos, profile)
+  const securityEvents = generateSecurityEvents(rng, rawTasks, teams, profile)
 
-// Build lookup maps
-const _prByTaskId = new Map<string, PullRequestOutcome>(_prOutcomes.map(pr => [pr.taskId, pr]))
+  const prByTaskId = new Map<string, PullRequestOutcome>(prOutcomes.map(pr => [pr.taskId, pr]))
 
-const SPAN_MAP = new Map<string, TraceSpan[]>()
-_spans.forEach(s => {
-  const list = SPAN_MAP.get(s.taskId) ?? []
-  list.push(s)
-  SPAN_MAP.set(s.taskId, list)
-})
+  const spanMap = new Map<string, TraceSpan[]>()
+  spans.forEach(s => {
+    const list = spanMap.get(s.taskId) ?? []
+    list.push(s)
+    spanMap.set(s.taskId, list)
+  })
 
-// Enrich tasks with autonomyBand from PR outcomes (simpler form: pr ? pr.autonomyBand : 'failed')
-const _tasks: AgentTask[] = _rawTasks.map(task => {
-  const pr = _prByTaskId.get(task.id)
-  return { ...task, autonomyBand: pr ? pr.autonomyBand : 'failed' }
-})
+  // Enrich tasks with autonomyBand from PR outcomes (pr ? pr.autonomyBand : 'failed').
+  const tasks: AgentTask[] = rawTasks.map(task => {
+    const pr = prByTaskId.get(task.id)
+    return { ...task, autonomyBand: pr ? pr.autonomyBand : 'failed' }
+  })
+  const taskById = new Map<string, AgentTask>(tasks.map(t => [t.id, t]))
 
-const _taskById = new Map<string, AgentTask>(_tasks.map(t => [t.id, t]))
+  const usersByTeamId = new Map<string, User[]>()
+  users.forEach(u => {
+    const list = usersByTeamId.get(u.teamId) ?? []
+    list.push(u)
+    usersByTeamId.set(u.teamId, list)
+  })
 
-const _usersByTeamId = new Map<string, User[]>()
-_users.forEach(u => {
-  const list = _usersByTeamId.get(u.teamId) ?? []
-  list.push(u)
-  _usersByTeamId.set(u.teamId, list)
-})
+  return { teams, repos, spans, prOutcomes, securityEvents, spanMap, tasks, taskById, usersByTeamId }
+}
+
+const _cache = new Map<Scenario, ReturnType<typeof buildDataset>>()
+function datasetFor(scenario: Scenario) {
+  let d = _cache.get(scenario)
+  if (!d) {
+    d = buildDataset(SCENARIOS[scenario].profile)
+    _cache.set(scenario, d)
+  }
+  return d
+}
+
+// Active dataset, exposed to helpers/getters via mutable bindings that setScenario()
+// reassigns. Closures capture the binding, so a swap is picked up everywhere.
+let _active: Scenario = DEFAULT_SCENARIO
+let _teams!: Team[]
+let _repos!: Repo[]
+let _spans!: TraceSpan[]
+let _prOutcomes!: PullRequestOutcome[]
+let _securityEvents!: SecurityEvent[]
+let SPAN_MAP!: Map<string, TraceSpan[]>
+let _tasks!: AgentTask[]
+let _taskById!: Map<string, AgentTask>
+let _usersByTeamId!: Map<string, User[]>
+
+function applyDataset(scenario: Scenario): void {
+  const d = datasetFor(scenario)
+  _teams = d.teams
+  _repos = d.repos
+  _spans = d.spans
+  _prOutcomes = d.prOutcomes
+  _securityEvents = d.securityEvents
+  SPAN_MAP = d.spanMap
+  _tasks = d.tasks
+  _taskById = d.taskById
+  _usersByTeamId = d.usersByTeamId
+}
+applyDataset(_active)
+
+/** Swap the active demo dataset (used by the sidebar scenario toggle). */
+export function setScenario(scenario: Scenario): void {
+  _active = scenario
+  applyDataset(scenario)
+}
+export function getScenario(): Scenario {
+  return _active
+}
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

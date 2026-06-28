@@ -36,10 +36,10 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 ## 3. Functional Requirements
 
 ### FR-01: Mock SSO Login (`/login`)
-- Okta-branded login page with org logo, email field, and "Continue with Okta" button
-- On click: writes `authenticated: true` to `sessionStorage`, redirects to `/overview`
+- Okta-branded login page with org logo. Instead of a single sign-in button it presents **demo workspaces** (companies) to choose from
+- **Workspace = scenario:** picking a company writes `authenticated: true` + the company id to `sessionStorage`, selects that company's **data scenario** (e.g. Acme Corp → healthy fleet, Globex Industries → struggling fleet), and redirects to `/overview`. The org name in the TopBar reflects the chosen workspace
 - `<RequireAuth>` route guard wraps all dashboard routes — unauthenticated users redirect to `/login`
-- Refreshing the page within the same tab preserves session; opening a new tab requires re-login
+- Refreshing the page within the same tab preserves session **and scenario** (the dataset is re-selected from `sessionStorage` at boot); opening a new tab requires re-login
 - **Signed-in identity:** the authenticated mock user (name, role, email, initials avatar) is shown in the sidebar footer for a professional, "you are signed in as…" feel. Identity comes from a single mock session module (`src/auth/session.ts`)
 - **Log out:** a Log out control in the sidebar footer drops the auth state (removes the `authenticated` flag) and returns to `/login`
 

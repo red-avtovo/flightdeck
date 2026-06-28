@@ -1,4 +1,5 @@
 import type { Rng } from '../seed'
+import type { ScenarioProfile } from '../scenario'
 import type { AgentTask, ErrorCategory, SpanStatus, SpanType, TraceSpan } from '../../types'
 
 const AGENT_SPAN_TYPES: SpanType[] = ['model_call', 'shell_command', 'git_operation', 'test_run', 'policy_check']
@@ -19,7 +20,7 @@ function failureStatus(rng: Rng, type: SpanType): SpanStatus {
   return 'error'
 }
 
-export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
+export function generateSpans(rng: Rng, tasks: AgentTask[], profile: ScenarioProfile): TraceSpan[] {
   const spans: TraceSpan[] = []
   let idCounter = 1
 
@@ -34,7 +35,7 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
 
     // env_setup span (from operator). Provisioning only fails for a failed task.
     const envDuration = Math.round(rng.logNormal(Math.log(8000), 0.4))
-    const envFailed = isFailed && rng.nextBool(0.10)
+    const envFailed = isFailed && rng.nextBool(profile.envFailProb)
     spans.push({
       id: `span-${idCounter++}`,
       taskId: task.id,
@@ -60,7 +61,7 @@ export function generateSpans(rng: Rng, tasks: AgentTask[]): TraceSpan[] {
       const duration = Math.round(rng.logNormal(Math.log(15000), 0.7))
 
       const isFinalFailure = i === failIndex
-      const isTransientFailure = isFailed && !isFinalFailure && rng.nextBool(0.08)
+      const isTransientFailure = isFailed && !isFinalFailure && rng.nextBool(profile.transientFailProb)
       const status: SpanStatus = (isFinalFailure || isTransientFailure)
         ? failureStatus(rng, type)
         : 'ok'

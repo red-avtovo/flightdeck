@@ -73,6 +73,7 @@ flightdeck/
 │   │       └── SpanDrawer.tsx
 │   ├── mock/
 │   │   ├── seed.ts             # mulberry32 seeded PRNG, seed=42
+│   │   ├── scenario.ts         # ScenarioProfile knobs + COMPANIES (healthy/problematic)
 │   │   ├── generators/
 │   │   │   ├── generateTeams.ts
 │   │   │   ├── generateRepos.ts
@@ -386,6 +387,17 @@ interface TaskFilters {
 
 ### Seeded RNG
 `mulberry32` PRNG, seed `42`. Same seed = same data across all renders, tests, and CI runs.
+
+### Demo scenarios
+`scenario.ts` defines a `ScenarioProfile` (status weights, PR-merge thresholds, edit-distance
+ranges, CI/failure/alert probabilities, token scale) and two profiles — **healthy** and
+**problematic** — plus the `COMPANIES` shown on the login screen. The generators take a profile,
+so the same seed produces an optimistic or a struggling fleet; only probabilities/ranges vary,
+never the draw count, so each scenario stays deterministic. `api.ts` builds one dataset per
+scenario (cached) and `setScenario()` swaps the active one via mutable bindings the helpers close
+over. The login workspace choice persists in `sessionStorage`; `main.tsx` calls `setScenario` at
+boot so a refresh re-loads the right dataset before the app renders. Scenario is fixed per
+session (no live toggle), so pages don't need it in their fetch deps.
 
 ### Data Volume
 - 90 days of history

@@ -1,4 +1,5 @@
 import type { Rng } from '../seed'
+import type { ScenarioProfile } from '../scenario'
 import type { AgentTask, Repo, TaskStatus, TaskType, Team, User } from '../../types'
 
 const TASK_TYPES: TaskType[] = ['bug_fix', 'feature', 'tests', 'docs', 'refactor', 'dependency_update']
@@ -11,13 +12,7 @@ const TOKEN_COST: Record<string, { inputPerM: number; outputPerM: number }> = {
   'claude-haiku-4-5': { inputPerM: 0.25, outputPerM: 1.25 },
 }
 
-// Token volumes are tiny per draw; scale to realistic enterprise usage so dollar
-// figures (total spend, cost/task, budget burn) read as thousands, not cents.
-const TOKEN_SCALE = 300
-
 const ALL_STATUSES: TaskStatus[] = ['completed', 'cancelled', 'failed', 'queued', 'running']
-// Healthy fleet: the vast majority of tasks complete; cancellations/failures are rare.
-const STATUS_WEIGHTS = [0.93, 0.015, 0.015, 0.02, 0.02]
 
 function weightedPick<T>(rng: Rng, items: readonly T[], weights: number[]): T {
   const r = rng.next()
@@ -39,6 +34,7 @@ export function generateTasks(
   teams: Team[],
   repos: Repo[],
   users: User[],
+  profile: ScenarioProfile,
   windowDays = 90,
 ): AgentTask[] {
   const now = new Date('2026-06-27T00:00:00Z').getTime()
@@ -65,13 +61,13 @@ export function generateTasks(
       const startedAt = new Date(dayStart + rng.nextInt(0, maxSecond) * 1000).toISOString()
       const durationMs = Math.round(rng.logNormal(Math.log(180000), 0.8))
       const calculatedCompletedAt = new Date(new Date(startedAt).getTime() + durationMs).toISOString()
-      const status = weightedPick(rng, ALL_STATUSES, STATUS_WEIGHTS)
+      const status = weightedPick(rng, ALL_STATUSES, profile.statusWeights)
       const isNonTerminal = status === 'queued' || status === 'running'
       const completedAt = isNonTerminal ? null : calculatedCompletedAt
       // Scale token usage to enterprise volumes so spend reads in the thousands (demo-sized),
       // not cents. The multiplier keeps the same draw, so determinism is preserved.
-      const inputTokens = rng.nextInt(1000, 50000) * TOKEN_SCALE
-      const outputTokens = rng.nextInt(500, 20000) * TOKEN_SCALE
+      const inputTokens = rng.nextInt(1000, 50000) * profile.tokenScale
+      const outputTokens = rng.nextInt(500, 20000) * profile.tokenScale
       const costs = TOKEN_COST[model]
       const costUsd = (inputTokens / 1e6) * costs.inputPerM + (outputTokens / 1e6) * costs.outputPerM
       const toolCallCount = rng.nextInt(5, 80)
@@ -80,9 +76,9 @@ export function generateTasks(
       const failedToolCallDraw = status === 'failed' ? rng.nextInt(1, 10) : rng.nextInt(0, 3)
       const failedToolCallCount =
         status === 'completed' || status === 'queued' || status === 'running' ? 0 : failedToolCallDraw
-      const policyBlockCount = rng.nextBool(0.04) ? rng.nextInt(1, 3) : 0
-      const humanInterventionRequired = rng.nextBool(0.05)
-      const hasPr = status === 'completed' && rng.nextBool(0.98)
+      const policyBlockCount = rng.nextBool(profile.policyBlockProb) ? rng.nextInt(1, 3) : 0
+      const humanInterventionRequired = rng.nextBool(profile.humanInterventionProb)
+      const hasPr = status === 'completed' && rng.nextBool(profile.hasPrProb)
       const prId = (hasPr && !isNonTerminal) ? `pr-${idCounter}` : null
 
       tasks.push({

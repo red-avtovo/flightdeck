@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import LoginPage from '../LoginPage'
+import { getActiveCompany, getActiveScenario } from '../../auth/session'
 
 function setup() {
   sessionStorage.clear()
@@ -19,22 +20,32 @@ function setup() {
 describe('LoginPage', () => {
   beforeEach(() => sessionStorage.clear())
 
-  it('renders Okta-branded login form', () => {
+  it('offers a demo workspace per company', () => {
     setup()
-    expect(screen.getByRole('button', { name: /continue with okta/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /acme corp/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /globex/i })).toBeInTheDocument()
   })
 
-  it('sets sessionStorage authenticated after clicking button', async () => {
+  it('authenticates and selects the healthy scenario when Acme is chosen', async () => {
     const user = userEvent.setup()
     setup()
-    await user.click(screen.getByRole('button', { name: /continue with okta/i }))
+    await user.click(screen.getByRole('button', { name: /acme corp/i }))
     expect(sessionStorage.getItem('authenticated')).toBe('true')
+    expect(getActiveCompany().name).toBe('Acme Corp')
+    expect(getActiveScenario()).toBe('healthy')
   })
 
-  it('navigates to /overview after login', async () => {
+  it('selects the problematic scenario when Globex is chosen', async () => {
     const user = userEvent.setup()
     setup()
-    await user.click(screen.getByRole('button', { name: /continue with okta/i }))
+    await user.click(screen.getByRole('button', { name: /globex/i }))
+    expect(getActiveScenario()).toBe('problematic')
+  })
+
+  it('navigates to /overview after picking a workspace', async () => {
+    const user = userEvent.setup()
+    setup()
+    await user.click(screen.getByRole('button', { name: /acme corp/i }))
     expect(screen.getByText('Overview Page')).toBeInTheDocument()
   })
 })

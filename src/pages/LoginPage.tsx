@@ -1,11 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { login } from '../auth/session'
+import { setScenario } from '../mock/api'
+import { COMPANIES, type Company } from '../mock/scenario'
 
 export default function LoginPage() {
   const navigate = useNavigate()
 
-  function handleLogin() {
-    login()
+  // Picking a workspace authenticates AND selects the data scenario for the session,
+  // so different companies present a healthy vs. a struggling fleet.
+  function selectCompany(company: Company) {
+    login(company.id)
+    setScenario(company.scenario)
     navigate('/overview')
   }
 
@@ -21,28 +26,27 @@ export default function LoginPage() {
 
         <div className="bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-2xl">
           <h1 className="text-xl font-bold text-slate-50 text-center mb-1">Sign in to Flightdeck</h1>
-          <p className="text-sm text-slate-400 text-center mb-8">Acme Corp · Okta SSO</p>
+          <p className="text-sm text-slate-400 text-center mb-8">Choose a demo workspace · Okta SSO</p>
 
-          <div className="mb-6">
-            <label htmlFor="email" className="block text-xs font-medium text-slate-400 mb-1.5">
-              Work email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="you@acme.example"
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              autoComplete="email"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLogin}
-            className="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-500 active:bg-orange-700 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-slate-900"
-          >
-            Continue with Okta
-          </button>
+          <ul className="space-y-3">
+            {COMPANIES.map(company => (
+              <li key={company.id}>
+                <button
+                  type="button"
+                  onClick={() => selectCompany(company)}
+                  className="group w-full rounded-lg border border-slate-700 bg-slate-800 p-4 text-left transition-colors hover:border-orange-500 hover:bg-slate-800/70 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-slate-50">{company.name}</span>
+                    <span className="text-orange-400 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>
+                      →
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">{company.blurb}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
 
           <p className="mt-6 text-center text-xs text-slate-500">
             Protected by Okta Identity Cloud

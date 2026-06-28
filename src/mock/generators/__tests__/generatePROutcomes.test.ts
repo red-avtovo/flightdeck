@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRng } from '../../seed'
+import { SCENARIOS } from '../../scenario'
 import { generateTeams } from '../generateTeams'
 import { generateRepos } from '../generateRepos'
 import { generateUsers } from '../generateUsers'
@@ -12,8 +13,8 @@ describe('generatePROutcomes', () => {
   const teams = generateTeams(rng)
   const repos = generateRepos(rng, teams)
   const users = generateUsers(rng, teams)
-  const tasks = generateTasks(rng, teams, repos, users)
-  const outcomes = generatePROutcomes(rng, tasks, repos)
+  const tasks = generateTasks(rng, teams, repos, users, SCENARIOS.healthy.profile)
+  const outcomes = generatePROutcomes(rng, tasks, repos, SCENARIOS.healthy.profile)
 
   it('only completed tasks with prId get an outcome', () => {
     const eligibleIds = new Set(tasks.filter(t => t.prId !== null).map(t => t.id))
@@ -50,7 +51,7 @@ describe('generatePROutcomes', () => {
     const t2 = generateTeams(rng2)
     const r2 = generateRepos(rng2, t2)
     const u2 = generateUsers(rng2, t2)
-    const tasks2 = generateTasks(rng2, t2, r2, u2)
-    expect(generatePROutcomes(rng2, tasks2, r2)).toEqual(outcomes)
+    const tasks2 = generateTasks(rng2, t2, r2, u2, SCENARIOS.healthy.profile)
+    expect(generatePROutcomes(rng2, tasks2, r2, SCENARIOS.healthy.profile)).toEqual(outcomes)
   })
 })

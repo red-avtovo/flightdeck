@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createRng } from '../../seed'
+import { SCENARIOS } from '../../scenario'
 import { generateTeams } from '../generateTeams'
 import { generateRepos } from '../generateRepos'
 import { generateUsers } from '../generateUsers'
@@ -12,8 +13,8 @@ describe('generateSpans', () => {
   const teams = generateTeams(rng)
   const repos = generateRepos(rng, teams)
   const users = generateUsers(rng, teams)
-  const tasks = generateTasks(rng, teams, repos, users)
-  const spans = generateSpans(rng, tasks)
+  const tasks = generateTasks(rng, teams, repos, users, SCENARIOS.healthy.profile)
+  const spans = generateSpans(rng, tasks, SCENARIOS.healthy.profile)
 
   it('each span has a taskId that exists in tasks', () => {
     const taskIds = new Set(tasks.map(t => t.id))
@@ -61,14 +62,14 @@ describe('generateSpans', () => {
     const t2 = generateTeams(rng2)
     const r2 = generateRepos(rng2, t2)
     const u2 = generateUsers(rng2, t2)
-    const tasks2 = generateTasks(rng2, t2, r2, u2)
-    expect(generateSpans(rng2, tasks2)).toEqual(spans)
+    const tasks2 = generateTasks(rng2, t2, r2, u2, SCENARIOS.healthy.profile)
+    expect(generateSpans(rng2, tasks2, SCENARIOS.healthy.profile)).toEqual(spans)
   })
 
   it('skips non-terminal tasks (queued/running)', () => {
     const rng = createRng(99)
     const fakeTask = { ...tasks[0], id: 'fake-1', status: 'queued' } as AgentTask
-    const spans = generateSpans(rng, [fakeTask])
+    const spans = generateSpans(rng, [fakeTask], SCENARIOS.healthy.profile)
     expect(spans).toHaveLength(0)
   })
 })

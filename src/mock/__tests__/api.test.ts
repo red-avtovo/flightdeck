@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import {
   getTeams,
   getRepos,
@@ -13,7 +13,10 @@ import {
   getActiveAlertCount,
   getTeamDetail,
   getRepoDetail,
+  setScenario,
+  getScenario,
 } from '../api'
+import { DEFAULT_SCENARIO } from '../scenario'
 
 describe('Mock API', () => {
   describe('getTeams', () => {
@@ -501,6 +504,30 @@ describe('Mock API', () => {
 
     it('is deterministic', async () => {
       expect(await getRepoDetail('repo-platform-core', '30d')).toEqual(await getRepoDetail('repo-platform-core', '30d'))
+    })
+  })
+
+  describe('scenarios', () => {
+    // Always restore the default so other suites see the healthy dataset.
+    afterEach(() => setScenario(DEFAULT_SCENARIO))
+
+    it('getScenario reflects setScenario', () => {
+      setScenario('problematic')
+      expect(getScenario()).toBe('problematic')
+    })
+
+    it('the problematic scenario is measurably worse than the healthy one', async () => {
+      setScenario('healthy')
+      const healthy = await getOrgOverview('30d')
+      setScenario('problematic')
+      const problematic = await getOrgOverview('30d')
+      expect(problematic.autonomyBreakdown.failed).toBeGreaterThan(healthy.autonomyBreakdown.failed)
+      expect(problematic.kpis.autonomyRate.value).toBeLessThan(healthy.kpis.autonomyRate.value)
+    })
+
+    it('each scenario is internally deterministic', async () => {
+      setScenario('problematic')
+      expect(await getOrgOverview('30d')).toEqual(await getOrgOverview('30d'))
     })
   })
 })

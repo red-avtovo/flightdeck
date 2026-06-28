@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import { useFilters } from '../../hooks/useFilters'
+import { getActiveCompany } from '../../auth/session'
 import type { Period } from '../../types'
 
 const PERIODS: Period[] = ['7d', '30d', '90d']
@@ -63,6 +64,7 @@ export function TopBar() {
   const { pathname } = useLocation()
   const drillDown = isDrillDown(pathname)
   const pageTitle = getPageTitle(pathname)
+  const orgName = getActiveCompany().name
 
   return (
     <header
@@ -71,7 +73,7 @@ export function TopBar() {
     >
       <div className="flex flex-col justify-center leading-tight">
         <span className="text-sm font-semibold text-slate-50">{pageTitle}</span>
-        <span className="text-xs text-slate-400">Acme Corp</span>
+        <span className="text-xs text-slate-400">{orgName}</span>
       </div>
 
       <div className="flex items-center gap-3">
