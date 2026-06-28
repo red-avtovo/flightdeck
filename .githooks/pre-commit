@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# Tracked pre-commit hook. Activated automatically by the `prepare` script in
+# package.json (which sets `git config core.hooksPath .githooks` on install),
+# so a fresh clone gets it after `pnpm install` — no per-developer setup.
+#
+# It runs the full CI suite locally so red commits never reach CI.
+# Skip in an emergency with `git commit --no-verify` or `SKIP_CI_HOOK=1 git commit`.
+
+if [ "${SKIP_CI_HOOK:-}" = "1" ]; then
+  echo "⏭  SKIP_CI_HOOK=1 — skipping local CI checks."
+  exit 0
+fi
+
+exec bash "$(git rev-parse --show-toplevel)/scripts/ci-local.sh"

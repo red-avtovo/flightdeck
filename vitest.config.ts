@@ -11,6 +11,12 @@ export default defineConfig({
       provider: 'v8',
       thresholds: { lines: 80, functions: 80 },
       exclude: [
+        // Build artifacts: CI runs coverage in a clean checkout, but locally
+        // (e.g. the pre-commit hook, or after `pnpm build`) these dirs exist and
+        // v8 would otherwise count their bundled JS, sinking coverage below 80%.
+        'dist/**',
+        'storybook-static/**',
+        'coverage/**',
         'src/test/**',
         '**/*.d.ts',
         'src/main.tsx',
