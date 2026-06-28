@@ -94,23 +94,22 @@ export default function CostPage() {
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 flex flex-col">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">Monthly budget</h2>
-          {/* Center the gauge in the card so it doesn't float in a sea of empty space when
-              this card is stretched to match the taller spend chart beside it. */}
+          {/* This card is about budget *posture*, not the spend amount — the Total Spend
+              KPI already owns that figure, so we don't reprint it here (it was showing
+              3× on one screen). Caption frames the % against the budget; the footer adds
+              budget-specific context (what's left, the daily run-rate). */}
           <div className="flex flex-1 flex-col items-center justify-center py-4">
             <BudgetGauge spentUsd={spentUsd} budgetUsd={budgetUsd} />
-            <p className="mt-2 text-sm text-slate-300 tabular-nums">
-              {formatCurrency(spentUsd)} <span className="text-slate-500">of {formatCurrency(budgetUsd)}</span>
-            </p>
+            <p className="mt-2 text-xs text-slate-400">of {formatCurrency(budgetUsd)} monthly budget</p>
           </div>
-          {/* Footer stats fill the lower half and add at-a-glance context. */}
           <dl className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4 text-center">
             <div>
               <dt className="text-xs text-slate-400">Remaining</dt>
               <dd className="text-sm font-semibold tabular-nums text-slate-100">{formatCurrency(remainingUsd)}</dd>
             </div>
             <div>
-              <dt className="text-xs text-slate-400">Projected (30d)</dt>
-              <dd className="text-sm font-semibold tabular-nums text-slate-100">{formatCurrency(spentUsd)}</dd>
+              <dt className="text-xs text-slate-400">Avg / day</dt>
+              <dd className="text-sm font-semibold tabular-nums text-slate-100">{formatCurrency(spentUsd / 30)}</dd>
             </div>
           </dl>
         </div>

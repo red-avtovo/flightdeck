@@ -69,7 +69,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
   - **Token Waste %** = tokens spent on work that produced no accepted output ÷ total tokens. "Wasted" tokens = tokens from terminal tasks that did **not** result in a merged PR (failed / cancelled / PR closed-unmerged) **plus** tokens from tasks whose PR was later `reverted`. Tokens from successful merged PRs are never counted as waste.
 - **Charts:**
   - Spend over time (area, Y-axis formatted as currency with ≤2 decimals; hover tooltip shares the same formatter so values display as dollars, e.g. `$14.09`)
-  - Budget burn gauge (radial — emerald when normal, amber warning at ≥ 75%, turns red at > 90%)
+  - Budget burn gauge (radial — emerald when normal, amber warning at ≥ 75%, turns red at > 90%). The card shows budget **posture** — % used, the monthly budget, what's **remaining**, and the **average daily** run-rate — and deliberately does **not** restate the absolute spend (the Total Spend KPI is the single home for that figure, so it isn't repeated across the screen)
   - Cost/merged PR by task type (horizontal bar — e.g., "bug_fix: $18, feature: $74, docs: $12")
 - **Table:** Team cost breakdown — team / spend / tasks / cost per task / cost per merged PR / waste %. Sortable.
 

@@ -18,6 +18,17 @@ describe('CostPage', () => {
     }, { timeout: 1000 })
   })
 
+  it('budget card shows posture (remaining + daily rate), not a repeat of Total Spend', async () => {
+    renderPage()
+    await waitFor(() => {
+      // The budget card's distinct stats…
+      expect(screen.getByText('Remaining')).toBeInTheDocument()
+      expect(screen.getByText('Avg / day')).toBeInTheDocument()
+      // …and it no longer reprints the spend figure as a "Projected" stat.
+      expect(screen.queryByText(/projected/i)).not.toBeInTheDocument()
+    }, { timeout: 1000 })
+  })
+
   it('renders cost/PR by task type horizontal bar chart', async () => {
     renderPage()
     await waitFor(() => {
