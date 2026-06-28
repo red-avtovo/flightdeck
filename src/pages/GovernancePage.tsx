@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom'
 import { getGovernanceMetrics } from '../mock/api'
 import { useFilters } from '../hooks/useFilters'
 import { useMockData } from '../hooks/useMockData'
@@ -9,6 +10,9 @@ import { Skeleton } from '../components/ui/Skeleton'
 export default function GovernancePage() {
   const { period, teamId, model } = useFilters()
   const { data, loading } = useMockData(() => getGovernanceMetrics(period, teamId, model), [period, teamId, model])
+  // Set by an Overview alert's deep link (/governance?event=<id>) to scroll + highlight its row.
+  const [searchParams] = useSearchParams()
+  const highlightEventId = searchParams.get('event') ?? undefined
 
   const EVENT_SERIES = [
     { key: 'policy_block',            label: 'Policy Block',    color: '#f43f5e' },
@@ -19,8 +23,8 @@ export default function GovernancePage() {
   if (loading || !data) {
     return (
       <div className="space-y-6" role="status" aria-label="Loading governance">
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
         <Skeleton className="h-64" />
         <Skeleton className="h-64" />
@@ -28,7 +32,7 @@ export default function GovernancePage() {
     )
   }
 
-  const { kpis, eventsOverTime, events } = data
+  const { kpis, eventsOverTime, events, criticalAlerts } = data
 
   return (
     <div className="space-y-8">
@@ -37,7 +41,10 @@ export default function GovernancePage() {
         <p className="text-sm text-slate-400">Are agents operating within policy boundaries?</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Critical Alerts matches the Overview "Alerts (N)" count, so the warning a
+            user sees on the Overview is findable here (and in the event log below). */}
+        <KpiCard title="Critical Alerts" value={criticalAlerts} format="number" trend={null} higherIsBetter={false} tooltip="Critical security events in this period — the alerts shown on the Overview" />
         <KpiCard title="Policy Blocks" value={kpis.policyBlocks.value} format="number" trend={kpis.policyBlocks.trendPct} higherIsBetter={false} />
         <KpiCard title="Secrets Detected" value={kpis.secretsDetected.value} format="number" trend={kpis.secretsDetected.trendPct} higherIsBetter={false} />
         <KpiCard title="Human Approvals" value={kpis.humanApprovalsRequired.value} format="number" trend={kpis.humanApprovalsRequired.trendPct} higherIsBetter={false} />
@@ -50,7 +57,7 @@ export default function GovernancePage() {
 
       <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
         <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Event log</h2>
-        <EventLog events={events} />
+        <EventLog events={events} highlightEventId={highlightEventId} />
       </div>
     </div>
   )

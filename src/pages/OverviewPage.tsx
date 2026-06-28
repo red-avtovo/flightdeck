@@ -60,10 +60,16 @@ export default function OverviewPage() {
       {visibleAlerts.length > 0 && (
         <div className="flex flex-wrap gap-2 items-center p-3 rounded-lg border border-amber-800/40 bg-amber-950/20">
           <span className="text-xs font-medium text-amber-400">Alerts ({visibleAlerts.length})</span>
-          {visibleAlerts.map(alert => (
+          {visibleAlerts.map(alert => {
+            // Security-event alerts deep-link to their row in the Governance event log;
+            // the cost-spike anomaly has no event, so it points at the Cost page instead.
+            const href = alert.source === 'security_event' ? `/governance?event=${alert.refId}` : '/cost'
+            return (
             <div key={alert.id} className="flex items-center gap-1.5">
-              <AlertBadge severity={alert.severity} label={alert.type.replace(/_/g, ' ')} />
-              <span className="text-xs text-slate-400">{alert.message}</span>
+              <Link to={href} className="flex items-center gap-1.5 transition-opacity hover:opacity-80">
+                <AlertBadge severity={alert.severity} label={alert.type.replace(/_/g, ' ')} />
+                <span className="text-xs text-slate-400">{alert.message}</span>
+              </Link>
               <button
                 onClick={() => dismissAlert(alert.id)}
                 aria-label={`Dismiss alert: ${alert.message}`}
@@ -72,7 +78,8 @@ export default function OverviewPage() {
                 ✕
               </button>
             </div>
-          ))}
+            )
+          })}
           <Link
             to="/governance"
             className="ml-auto text-xs text-orange-400 hover:text-orange-300 transition-colors whitespace-nowrap"

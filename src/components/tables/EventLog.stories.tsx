@@ -18,4 +18,6 @@ const EVENTS: SecurityEvent[] = [
 ]
 
 export const Populated: Story = { args: { events: EVENTS } }
+// Deep-linked from an Overview alert: the matching row is highlighted + scrolled into view.
+export const HighlightedRow: Story = { args: { events: EVENTS, highlightEventId: 'e2' } }
 export const Empty:     Story = { args: { events: [] } }

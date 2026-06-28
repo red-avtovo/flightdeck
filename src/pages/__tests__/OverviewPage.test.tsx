@@ -52,6 +52,15 @@ describe('OverviewPage', () => {
     }, { timeout: 1000 })
   })
 
+  it('each security alert deep-links to its Governance event row', async () => {
+    renderPage()
+    await waitFor(() => {
+      const deepLinks = screen.getAllByRole('link').filter(l =>
+        (l.getAttribute('href') || '').startsWith('/governance?event='))
+      expect(deepLinks.length).toBeGreaterThan(0)
+    }, { timeout: 1000 })
+  })
+
   it('can dismiss individual alerts', async () => {
     const user = userEvent.setup()
     renderPage()

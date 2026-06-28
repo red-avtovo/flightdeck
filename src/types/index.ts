@@ -183,6 +183,8 @@ export interface GovernanceMetrics {
   kpis: Record<'policyBlocks' | 'secretsDetected' | 'humanApprovalsRequired', Kpi>
   eventsOverTime: Array<{ date: string } & Record<SecurityEventType, number>>
   events: SecurityEvent[]
+  /** Critical security events in the period — the alerts the Overview shows. */
+  criticalAlerts: number
 }
 
 export interface MemberWithUsage extends User {

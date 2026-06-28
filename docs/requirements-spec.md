@@ -49,7 +49,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **Charts:**
   - Tasks over time (area, stacked by autonomy band)
   - Team scatter (x = task volume, y = autonomy rate — no ranking, pattern view)
-- **Alerts strip:** Dismissible, count of active alerts by severity, links to `/governance`. Alerts are **derived, not stored** — synthesized from high-severity Security Events plus the injected cost-spike anomaly (see Technical Spec `Alert` type) and returned inline on `getOrgOverview`
+- **Alerts strip:** Dismissible, count of active alerts by severity, links to `/governance`. Alerts are **derived, not stored** — synthesized from high-severity Security Events plus the injected cost-spike anomaly (see Technical Spec `Alert` type) and returned inline on `getOrgOverview`. This active-alert count is the **single source of truth**: the same number drives the Governance sidebar badge and the Governance "Critical Alerts" KPI, and each security-event alert deep-links to its row in the Governance event log
 - **Global time range:** 7d / 30d / 90d (segmented button group)
 
 ### FR-03: Outcomes & Quality (`/outcomes`)
@@ -86,9 +86,9 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
 - **Span drawer:** Clicking a task opens a slide-over with a flat span list (type, name, duration, status)
 
 ### FR-06: Governance & Audit (`/governance`)
-- **KPI cards (3):** Policy Blocks (count + rate), Secrets Detected, Human Approvals Required
+- **KPI cards (4):** Critical Alerts, Policy Blocks (count + rate), Secrets Detected, Human Approvals Required. **Critical Alerts** is the count of critical security events in the period — the same number shown in the Overview alerts strip and the sidebar badge — so a warning seen on the Overview is findable here.
 - **Chart:** Security events over time — stacked area (policy_block / secret_detected / human_approval_required)
-- **Event log:** Filterable by type. Columns: severity badge / type / task ID / repo / timestamp. No individual user column.
+- **Event log:** Filterable by type. Columns: severity badge / type / task ID / repo / timestamp. No individual user column. A row can be **deep-linked from an Overview alert** (`/governance?event=<id>`) — the target row is scrolled into view and highlighted.
 
 ### FR-07: Team Drill-Down (`/teams/:teamId`)
 - Header: team name + tasks, autonomy rate, total spend

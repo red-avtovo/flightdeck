@@ -1,21 +1,31 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { FilterProvider } from '../../context/FilterContext'
 import GovernancePage from '../GovernancePage'
+import { getActiveAlertCount } from '../../mock/api'
 
 function renderPage() {
   return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><FilterProvider><GovernancePage /></FilterProvider></MemoryRouter>)
 }
 
 describe('GovernancePage', () => {
-  it('renders 3 KPI cards', async () => {
+  it('renders 4 KPI cards including Critical Alerts', async () => {
     renderPage()
     await waitFor(() => {
-      ['Policy Blocks', 'Secrets Detected', 'Human Approvals'].forEach(l =>
+      ['Critical Alerts', 'Policy Blocks', 'Secrets Detected', 'Human Approvals'].forEach(l =>
         expect(screen.getByText(l)).toBeInTheDocument()
       )
     }, { timeout: 1000 })
+  })
+
+  it('Critical Alerts KPI matches the Overview active-alert count (sans cost spike)', async () => {
+    // Overview count for default filters is the active-alert count; the cost-spike
+    // anomaly is org-level and excluded from Governance, so they match here.
+    const overviewCount = await getActiveAlertCount('30d', null, null)
+    renderPage()
+    const card = (await screen.findByText('Critical Alerts')).closest('div')!
+    expect(within(card).getByText(String(overviewCount))).toBeInTheDocument()
   })
 
   it('event log has at least one row of each event type', async () => {

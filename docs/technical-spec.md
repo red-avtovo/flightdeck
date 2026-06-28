@@ -333,6 +333,7 @@ interface GovernanceMetrics {
   kpis: Record<'policyBlocks' | 'secretsDetected' | 'humanApprovalsRequired', Kpi>
   eventsOverTime: Array<{ date: string } & Record<SecurityEventType, number>>
   events: SecurityEvent[]
+  criticalAlerts: number   // critical security events in period = the Overview alert count
 }
 
 // Extends User with per-member usage stats for the selected period (FR-07).
@@ -410,6 +411,8 @@ interface TaskFilters {
 // undefined/null = "all"; both are threaded through tasksFor()/priorTasksFor()
 // so KPIs, charts, tables, and derived alerts reflect the active filter set.
 getOrgOverview(period: Period, teamId?: string | null, model?: string | null): Promise<OrgOverview>
+// Live count for the sidebar Governance badge = buildOrgAlerts(...).length (same source as the Overview strip).
+getActiveAlertCount(period: Period, teamId?: string | null, model?: string | null): Promise<number>
 getTeamMetrics(period: Period): Promise<TeamMetrics[]>
 getOutcomesMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<OutcomesMetrics>
 getCostMetrics(period: Period, teamId?: string | null, model?: string | null): Promise<CostMetrics>
@@ -453,8 +456,9 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
 ### AppShell Layout
 - Sidebar: 240px fixed, icon-only collapse < 1280px, active nav item highlighted.
   Two nav groups: the primary dashboard links (Overview, Outcomes, Cost,
-  Reliability, Governance — the Governance item carries a count badge for active
-  high-severity events), and a **Teams** group whose links open `/teams/:teamId`.
+  Reliability, Governance — the Governance item carries a **live** count badge
+  (`getActiveAlertCount`, filter-aware, hidden at 0) that equals the Overview's
+  active-alert count, not a hardcoded number), and a **Teams** group whose links open `/teams/:teamId`.
   The Teams group is the primary in-app entry point to the FR-07/FR-08 drill-downs
   (the org-level routes alone are otherwise unreachable from the chrome).
   The footer shows the signed-in mock user (initials avatar + name/role/email from

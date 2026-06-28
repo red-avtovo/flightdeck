@@ -10,12 +10,14 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { getCurrentUser, logout } from '../../auth/session'
+import { useFilters } from '../../hooks/useFilters'
+import { useMockData } from '../../hooks/useMockData'
+import { getActiveAlertCount } from '../../mock/api'
 
 interface NavItem {
   to: string
   label: string
   Icon: LucideIcon
-  badge?: number
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -23,7 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/outcomes',   label: 'Outcomes',    Icon: GitMerge },
   { to: '/cost',       label: 'Cost',         Icon: DollarSign },
   { to: '/reliability',label: 'Reliability',  Icon: Activity },
-  { to: '/governance', label: 'Governance',   Icon: ShieldCheck, badge: 3 },
+  { to: '/governance', label: 'Governance',   Icon: ShieldCheck },
 ]
 
 const TEAM_ITEMS = [
@@ -36,6 +38,14 @@ const TEAM_ITEMS = [
 export function Sidebar() {
   const navigate = useNavigate()
   const user = getCurrentUser()
+
+  // Live count of active alerts for the current filters — the same number the
+  // Overview "Alerts (N)" strip shows — surfaced as the Governance nav badge.
+  const { period, teamId, model } = useFilters()
+  const { data: alertCount } = useMockData(
+    () => getActiveAlertCount(period, teamId, model),
+    [period, teamId, model],
+  )
 
   function handleLogout() {
     logout()
@@ -63,7 +73,10 @@ export function Sidebar() {
       {/* Nav links */}
       <nav className="flex-1 py-4 px-2 overflow-y-auto">
         <div className="space-y-1">
-          {NAV_ITEMS.map(({ to, label, Icon, badge }) => (
+          {NAV_ITEMS.map(({ to, label, Icon }) => {
+            // Only Governance carries a badge: the live active-alert count (hidden at 0).
+            const badge = to === '/governance' && alertCount && alertCount > 0 ? alertCount : undefined
+            return (
             <NavLink
               key={to}
               to={to}
@@ -74,7 +87,7 @@ export function Sidebar() {
                    : 'text-slate-400 hover:text-slate-50 hover:bg-slate-800'
                  }`
               }
-              aria-label={badge ? `${label}, ${badge} items` : label}
+              aria-label={badge ? `${label}, ${badge} active alerts` : label}
             >
               <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
               <span className="hidden xl:block flex-1">{label}</span>
@@ -87,7 +100,8 @@ export function Sidebar() {
                 </span>
               )}
             </NavLink>
-          ))}
+            )
+          })}
         </div>
 
         {/* Teams group */}

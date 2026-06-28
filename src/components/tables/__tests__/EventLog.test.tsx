@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EventLog } from '../EventLog'
@@ -31,5 +31,17 @@ describe('EventLog', () => {
   it('renders severity badge on each row', () => {
     render(<EventLog events={EVENTS} />)
     expect(screen.getAllByText(/critical|warning|info/).length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('highlights and scrolls to the deep-linked event row', () => {
+    const scrollSpy = vi.fn()
+    Element.prototype.scrollIntoView = scrollSpy
+    render(<EventLog events={EVENTS} highlightEventId="e2" />)
+    // Scope to table cells — "Secret Detected" also appears in the filter <option>.
+    const row = screen.getByRole('cell', { name: 'Secret Detected' }).closest('tr')!
+    expect(row).toHaveAttribute('data-highlighted', 'true')
+    expect(scrollSpy).toHaveBeenCalled()
+    // other rows are not highlighted
+    expect(screen.getByRole('cell', { name: 'Policy Block' }).closest('tr')).not.toHaveAttribute('data-highlighted')
   })
 })

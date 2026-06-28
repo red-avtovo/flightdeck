@@ -10,6 +10,7 @@ import {
   getCostMetrics,
   getReliabilityMetrics,
   getGovernanceMetrics,
+  getActiveAlertCount,
   getTeamDetail,
   getRepoDetail,
 } from '../api'
@@ -395,6 +396,36 @@ describe('Mock API', () => {
 
     it('is deterministic', async () => {
       expect(await getGovernanceMetrics('30d')).toEqual(await getGovernanceMetrics('30d'))
+    })
+  })
+
+  // The Overview strip, the sidebar badge, and the Governance KPI must agree —
+  // they all derive from one source (buildOrgAlerts). Pin that coherence.
+  describe('alert coherence across surfaces', () => {
+    it('getActiveAlertCount equals the number of Overview alerts', async () => {
+      const ov = await getOrgOverview('30d')
+      expect(await getActiveAlertCount('30d')).toBe(ov.alerts.length)
+    })
+
+    it("Governance criticalAlerts equals the Overview's security-event alerts", async () => {
+      const ov = await getOrgOverview('30d')
+      const gov = await getGovernanceMetrics('30d')
+      const securityAlerts = ov.alerts.filter(a => a.source === 'security_event').length
+      expect(gov.criticalAlerts).toBe(securityAlerts)
+    })
+
+    it('every security-event alert refId points at a real security event', async () => {
+      const ov = await getOrgOverview('30d')
+      const events = await getSecurityEvents('30d')
+      const ids = new Set(events.map(e => e.id))
+      ov.alerts
+        .filter(a => a.source === 'security_event')
+        .forEach(a => expect(ids.has(a.refId)).toBe(true))
+    })
+
+    it('stays coherent under a team filter', async () => {
+      const ov = await getOrgOverview('30d', 'team-platform')
+      expect(await getActiveAlertCount('30d', 'team-platform')).toBe(ov.alerts.length)
     })
   })
 

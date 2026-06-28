@@ -1,14 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { Sidebar } from '../Sidebar'
+import { FilterProvider } from '../../../context/FilterContext'
+import { getActiveAlertCount } from '../../../mock/api'
 
 describe('Sidebar', () => {
+  // Sidebar reads filters (for the live Governance badge), so it needs FilterProvider.
   function setup(initialPath = '/overview') {
     return render(
       <MemoryRouter initialEntries={[initialPath]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Sidebar />
+        <FilterProvider>
+          <Sidebar />
+        </FilterProvider>
       </MemoryRouter>,
     )
   }
@@ -119,17 +124,17 @@ describe('Sidebar', () => {
     expect(platformLink).toHaveClass('bg-orange-600')
   })
 
-  // Governance badge
-  it('renders a badge count on the Governance link', () => {
+  // Governance badge — the live active-alert count (default filters: 30d / all / all),
+  // the same number the Overview "Alerts (N)" strip shows. Not a hardcoded value.
+  it('shows the live active-alert count on the Governance link', async () => {
+    const expected = await getActiveAlertCount('30d', null, null)
+    expect(expected).toBeGreaterThan(0) // sanity: mock data has critical alerts in 30d
     setup()
-    // The aria-label on the link encodes the count
-    const link = screen.getByRole('link', { name: /governance.*3/i })
+    const link = await screen.findByRole('link', {
+      name: new RegExp(`governance, ${expected} active alerts`, 'i'),
+    })
     expect(link).toBeInTheDocument()
-  })
-
-  it('renders the governance badge pill with count 3', () => {
-    setup()
-    expect(screen.getByText('3')).toBeInTheDocument()
+    expect(within(link).getByText(String(expected))).toBeInTheDocument()
   })
 
   // User footer

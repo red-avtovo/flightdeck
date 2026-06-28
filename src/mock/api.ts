@@ -212,6 +212,61 @@ export async function getSecurityEvents(period: Period): Promise<SecurityEvent[]
   return _securityEvents.filter(e => new Date(e.createdAt).getTime() >= cutoff)
 }
 
+// Active org-level alerts: critical security events in the period (scoped to the
+// filtered task set when a team/model filter is active) plus a cost-spike anomaly.
+// SINGLE SOURCE OF TRUTH — the Overview alerts strip, the sidebar Governance badge
+// (getActiveAlertCount), and the Governance "Critical Alerts" count all derive from
+// this, so the numbers always agree. refId points at the security event so the
+// Overview can deep-link to its row in the Governance event log.
+function buildOrgAlerts(period: Period, team?: string, mdl?: string): Alert[] {
+  const tasks = tasksFor(period, team, undefined, mdl)
+  const taskIds = new Set(tasks.map(t => t.id))
+  const filtersActive = team !== undefined || mdl !== undefined
+
+  const criticalEvents = _securityEvents.filter(e => {
+    const ts = new Date(e.createdAt).getTime()
+    if (!inPeriod(ts, period) || e.severity !== 'critical') return false
+    if (filtersActive && !taskIds.has(e.taskId)) return false
+    return true
+  })
+  const alerts: Alert[] = criticalEvents.slice(0, 20).map(e => ({
+    id: `alert-${e.id}`,
+    severity: e.severity,
+    source: 'security_event' as const,
+    type: e.type,
+    message: `${e.type.replace(/_/g, ' ')} detected in task ${e.taskId}`,
+    refId: e.id,
+    createdAt: e.createdAt,
+  }))
+
+  // Cost-spike anomaly is org-level (no matching governance event row).
+  const days = periodDays(period)
+  const dailyAvgSpend = tasks.length > 0 ? totalSpend(tasks) / days : 0
+  if (dailyAvgSpend > (MONTHLY_BUDGET_USD / 30) * 1.5) {
+    alerts.push({
+      id: 'alert-cost-spike-1',
+      severity: 'warning',
+      source: 'cost_anomaly',
+      type: 'cost_spike',
+      message: `Daily spend $${dailyAvgSpend.toFixed(2)} exceeds 150% of budget`,
+      refId: 'org-acme',
+      createdAt: new Date(NOW).toISOString(),
+    })
+  }
+  return alerts
+}
+
+// Lightweight getter for the sidebar Governance badge: the live count of active
+// alerts the Overview is showing for the current filters (replaces a hardcoded 3).
+export async function getActiveAlertCount(
+  period: Period,
+  teamId?: string | null,
+  model?: string | null,
+): Promise<number> {
+  await delay()
+  return buildOrgAlerts(period, teamId ?? undefined, model ?? undefined).length
+}
+
 export async function getOrgOverview(
   period: Period,
   teamId?: string | null,
@@ -322,39 +377,10 @@ export async function getOrgOverview(
   const scatterPrs = prsForTasks(new Set(scatterTasks.map(t => t.id)))
   const teamScatter = _teams.map(team => buildTeamMetrics(team, scatterTasks, scatterPrs))
 
-  // Alerts from critical security events. When a team/model filter is active,
-  // scope alerts to the filtered task set so they stay coherent with the charts.
-  const filtersActive = team !== undefined || mdl !== undefined
-  const criticalEvents = _securityEvents.filter(e => {
-    const ts = new Date(e.createdAt).getTime()
-    if (!inPeriod(ts, period) || e.severity !== 'critical') return false
-    if (filtersActive && !taskIds.has(e.taskId)) return false
-    return true
-  })
-  const alerts: Alert[] = criticalEvents.slice(0, 20).map(e => ({
-    id: `alert-${e.id}`,
-    severity: e.severity,
-    source: 'security_event' as const,
-    type: e.type,
-    message: `${e.type.replace(/_/g, ' ')} detected in task ${e.taskId}`,
-    refId: e.id,
-    createdAt: e.createdAt,
-  }))
-
-  // Cost spike alert
-  const dailyAvgSpend = tasks.length > 0 ? spend / days : 0
-  const budgetDailyLimit = MONTHLY_BUDGET_USD / 30
-  if (dailyAvgSpend > budgetDailyLimit * 1.5) {
-    alerts.push({
-      id: 'alert-cost-spike-1',
-      severity: 'warning',
-      source: 'cost_anomaly',
-      type: 'cost_spike',
-      message: `Daily spend $${dailyAvgSpend.toFixed(2)} exceeds 150% of budget`,
-      refId: 'org-acme',
-      createdAt: new Date(NOW).toISOString(),
-    })
-  }
+  // Active alerts (critical security events + cost-spike anomaly), built by the
+  // shared helper so the Overview strip, the sidebar badge, and the Governance
+  // page all derive from the same set — see buildOrgAlerts.
+  const alerts = buildOrgAlerts(period, team, mdl)
 
   return { autonomyBreakdown, kpis, tasksOverTime, teamScatter, alerts }
 }
@@ -733,7 +759,14 @@ export async function getGovernanceMetrics(
     return row
   })
 
-  return { kpis, eventsOverTime, events }
+  // The governance-domain subset of the Overview alerts (critical security events).
+  // Surfaced as a KPI so the number a user sees on the Overview is findable here too.
+  // Equals the sidebar badge / Overview count except when a cost-spike anomaly is
+  // present (that one is org-level and has no event-log row).
+  const criticalAlerts = buildOrgAlerts(period, team, mdl)
+    .filter(a => a.source === 'security_event').length
+
+  return { kpis, eventsOverTime, events, criticalAlerts }
 }
 
 export async function getTeamDetail(teamId: string, period: Period): Promise<TeamDetail> {
