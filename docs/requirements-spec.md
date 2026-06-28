@@ -79,7 +79,7 @@ The unit of value is a **merged PR the agent wrote**, not a token or a run. This
   - **Env Setup P95** = P95 of `env_setup` span duration. These spans do **not** come from agent observability — they originate from the **Agent Operator** (the provisioning layer that deploys environments) and are merged into the task trace with `source: 'operator'`
 - **Charts:**
   - Task duration P50/P95 trend (multi-line)
-  - Errors by category trend (**multi-line — one line per error category**; shows absolute error counts per category, not a percentage/rate; required, not a single aggregate line)
+  - Errors by category trend (**multi-line — one line per error category**; shows absolute error counts per category, not a percentage/rate; required, not a single aggregate line). The legend is **interactive** — clicking a category shows/hides its line so the chart can be thinned out when all six are too busy to read
   - **Tool reliability leaderboard** (horizontal bar) — tools ranked by error rate, most-broken first. This is a *tool* leaderboard, not a team/engineer ranking (those remain out of scope)
 - **Tool performance table:** tool type / call count / error rate / P50 latency / P95 latency (aggregated from `TraceSpan` grouped by span type)
 - **Task list:** Recent tasks, filterable by status (completed / failed / blocked)

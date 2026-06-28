@@ -87,8 +87,9 @@ export default function ReliabilityPage() {
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
           <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4">Errors by category</h2>
-          {/* Absolute error counts per category per day (not a rate); format as integers */}
-          <LineChart data={errorRateByCategory} series={errorSeries} formatY={v => String(Math.round(v))} />
+          {/* Absolute error counts per category per day (not a rate); format as integers.
+              toggleable: six category lines are busy, so let the user show/hide each one. */}
+          <LineChart data={errorRateByCategory} series={errorSeries} formatY={v => String(Math.round(v))} toggleable />
         </div>
 
         <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">

@@ -493,7 +493,7 @@ Generic Recharts scatter component (kept generic for reuse beyond teams). On the
 | Budget gauge | Cost | Custom SVG arc | Radial, red > 90%; arc sized so the percentage sits centered inside the bowl, with the state label (e.g. "Over budget") tucked above the number rather than below it |
 | Cost/PR by task type | Cost | BarChart (horizontal) | Signature visual |
 | Task duration P50/P95 | Reliability | LineChart (2 lines) | |
-| Errors by category | Reliability | LineChart (multi-line) | One line per error category (6); Y-axis shows absolute error counts per day (not a percentage/rate); integer formatter |
+| Errors by category | Reliability | LineChart (multi-line) | One line per error category (6); Y-axis shows absolute error counts per day (not a percentage/rate); integer formatter; `toggleable` legend (interactive chips show/hide each series) |
 | Tool reliability leaderboard | Reliability | BarChart (horizontal) | Tools ranked by error rate, most-broken first |
 | Security events | Governance | AreaChart (stacked) | 3 event types |
 | Sparklines | KPI cards | Custom inline SVG | No axes, no tooltip |

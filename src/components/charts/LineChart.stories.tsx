@@ -59,6 +59,32 @@ export const Counts: Story = {
   },
 }
 
+// Many-series chart with the interactive legend — click a chip to show/hide a line.
+export const ToggleableByCategory: Story = {
+  args: {
+    data: DATES.map((date, i) => ({
+      date,
+      tool_error: 3 + i * 2,
+      timeout: 1 + i,
+      env_setup: 2 + Math.round(Math.sin(i) * 2),
+      policy_block: 1 + Math.round(Math.cos(i) * 2),
+      model_error: 2 + i,
+      test_failure: 4 + Math.round(Math.sin(i + 1) * 3),
+    })),
+    series: [
+      { key: 'tool_error', label: 'tool error', color: '#6366f1' },
+      { key: 'timeout', label: 'timeout', color: '#f43f5e' },
+      { key: 'env_setup', label: 'env setup', color: '#f59e0b' },
+      { key: 'policy_block', label: 'policy block', color: '#e879f9' },
+      { key: 'model_error', label: 'model error', color: '#0ea5e9' },
+      { key: 'test_failure', label: 'test failure', color: '#10b981' },
+    ],
+    height: 260,
+    toggleable: true,
+    formatY: (v: number) => String(Math.round(v)),
+  },
+}
+
 export const Empty: Story = {
   args: {
     data: [],
