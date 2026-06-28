@@ -127,7 +127,7 @@ flightdeck/
 
 All dashboard routes are wrapped by `<RequireAuth>` and share `<AppShell>` as the layout via React Router nested routing. `<BrowserRouter basename="/flightdeck">` is used for GitHub Pages compatibility.
 
-**Deep-link refresh (GitHub Pages + BrowserRouter).** GitHub Pages has no server-side rewrites, so a `public/404.html` that re-serves `index.html` (preserving the requested path) is shipped. Refreshing or directly opening any deep route (e.g. `/cost`) then boots the SPA at the correct location instead of 404ing. Mocked auth survives the refresh because `<RequireAuth>` reads `sessionStorage`, which persists across reloads within the same tab (FR-01). BrowserRouter is a hard requirement — HashRouter is not used.
+**Deep-link refresh (GitHub Pages + BrowserRouter).** GitHub Pages has no server-side rewrites, so deep-link refresh uses the two-part SPA redirect dance: `public/404.html` (served for any unknown path) redirects to the app root with the requested path/query encoded into `?p=<path>&q=<query>` (literal `&` escaped as `~and~`), and `restoreDeepLink()` (called from `main.tsx` **before** `createRoot().render`, so the router never sees the encoded URL) rewrites the URL back via `history.replaceState`. Without the restore step the app boots at the root, matches `path="/"`, and bounces every refresh to `/overview`. Refreshing or directly opening any deep route (e.g. `/cost`) then boots the SPA at the correct location instead of 404ing. Mocked auth survives the refresh because `<RequireAuth>` reads `sessionStorage`, which persists across reloads within the same tab (FR-01). BrowserRouter is a hard requirement — HashRouter is not used.
 
 ---
 
