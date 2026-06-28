@@ -23,9 +23,17 @@ const preview: Preview = {
     },
   },
   decorators: [
-    Story => React.createElement(
+    // Single global Router + FilterProvider for every story. Stories must NOT
+    // wrap their own <MemoryRouter> — React Router throws "You cannot render a
+    // <Router> inside another <Router>", which surfaces as an empty-message
+    // StorybookTestRunnerError in CI. A story that needs a specific route sets
+    // it via `parameters: { router: { initialEntries: ['/overview'] } }`.
+    (Story, context) => React.createElement(
       MemoryRouter,
-      { future: { v7_startTransition: true, v7_relativeSplatPath: true } },
+      {
+        initialEntries: context.parameters.router?.initialEntries ?? ['/'],
+        future: { v7_startTransition: true, v7_relativeSplatPath: true },
+      },
       React.createElement(FilterProvider, null, React.createElement(Story)),
     ),
   ],

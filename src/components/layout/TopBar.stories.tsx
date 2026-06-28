@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MemoryRouter } from 'react-router-dom'
-import { FilterProvider } from '../../context/FilterContext'
 import { TopBar } from './TopBar'
 
+// Router + FilterProvider come from the global decorator in .storybook/preview.ts.
+// Stories pick their route via parameters.router.initialEntries — never wrap a
+// second <MemoryRouter>, or React Router throws "Router inside a Router".
 const meta: Meta<typeof TopBar> = {
   title: 'Layout/TopBar',
   component: TopBar,
@@ -13,32 +14,10 @@ type Story = StoryObj<typeof TopBar>
 
 // OrgPage: shows the Period button group + Team + Model filter pills (non-drill-down path)
 export const OrgPage: Story = {
-  decorators: [
-    (Story) => (
-      <MemoryRouter
-        initialEntries={['/overview']}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
-        <FilterProvider>
-          <Story />
-        </FilterProvider>
-      </MemoryRouter>
-    ),
-  ],
+  parameters: { router: { initialEntries: ['/overview'] } },
 }
 
 // DrillDown: shows the Period button group only (team/repo drill-down path)
 export const DrillDown: Story = {
-  decorators: [
-    (Story) => (
-      <MemoryRouter
-        initialEntries={['/teams/team-platform']}
-        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-      >
-        <FilterProvider>
-          <Story />
-        </FilterProvider>
-      </MemoryRouter>
-    ),
-  ],
+  parameters: { router: { initialEntries: ['/teams/team-platform'] } },
 }
