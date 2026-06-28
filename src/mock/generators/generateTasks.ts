@@ -11,6 +11,10 @@ const TOKEN_COST: Record<string, { inputPerM: number; outputPerM: number }> = {
   'claude-haiku-4-5': { inputPerM: 0.25, outputPerM: 1.25 },
 }
 
+// Token volumes are tiny per draw; scale to realistic enterprise usage so dollar
+// figures (total spend, cost/task, budget burn) read as thousands, not cents.
+const TOKEN_SCALE = 300
+
 const ALL_STATUSES: TaskStatus[] = ['completed', 'cancelled', 'failed', 'queued', 'running']
 // Healthy fleet: the vast majority of tasks complete; cancellations/failures are rare.
 const STATUS_WEIGHTS = [0.93, 0.015, 0.015, 0.02, 0.02]
@@ -64,8 +68,10 @@ export function generateTasks(
       const status = weightedPick(rng, ALL_STATUSES, STATUS_WEIGHTS)
       const isNonTerminal = status === 'queued' || status === 'running'
       const completedAt = isNonTerminal ? null : calculatedCompletedAt
-      const inputTokens = rng.nextInt(1000, 50000)
-      const outputTokens = rng.nextInt(500, 20000)
+      // Scale token usage to enterprise volumes so spend reads in the thousands (demo-sized),
+      // not cents. The multiplier keeps the same draw, so determinism is preserved.
+      const inputTokens = rng.nextInt(1000, 50000) * TOKEN_SCALE
+      const outputTokens = rng.nextInt(500, 20000) * TOKEN_SCALE
       const costs = TOKEN_COST[model]
       const costUsd = (inputTokens / 1e6) * costs.inputPerM + (outputTokens / 1e6) * costs.outputPerM
       const toolCallCount = rng.nextInt(5, 80)

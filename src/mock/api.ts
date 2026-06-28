@@ -546,8 +546,12 @@ export async function getCostMetrics(
 
   const spendTrend = dailySparkline(period, tasks, dt => totalSpend(dt))
 
+  // Budget gauge: project the period's spend to a 30-day month and compare to the
+  // monthly budget. Return the actual dollar figures (single source of truth) so the
+  // card shows the same spend as the Total Spend KPI rather than a re-derived number.
   const days = periodDays(period)
-  const budgetBurnPct = Math.min(100, (spend / MONTHLY_BUDGET_USD) * 100 * (30 / days))
+  const spentUsd = spend * (30 / days)
+  const budgetUsd = MONTHLY_BUDGET_USD
 
   const TASK_TYPES: TaskType[] = ['bug_fix', 'feature', 'tests', 'docs', 'refactor', 'dependency_update']
   const costPerMergedPrByTaskType = TASK_TYPES.map(taskType => {
@@ -563,7 +567,7 @@ export async function getCostMetrics(
 
   const teamBreakdown = _teams.map(team => buildTeamMetrics(team, tasks, prs))
 
-  return { kpis, spendTrend, budgetBurnPct, costPerMergedPrByTaskType, teamBreakdown }
+  return { kpis, spendTrend, spentUsd, budgetUsd, costPerMergedPrByTaskType, teamBreakdown }
 }
 
 export async function getReliabilityMetrics(

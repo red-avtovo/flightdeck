@@ -308,10 +308,12 @@ describe('Mock API', () => {
       expect(m.kpis.totalSpend.value).toBeGreaterThan(0)
     })
 
-    it('budgetBurnPct is between 0 and 100', async () => {
+    it('reports coherent budget figures: spentUsd matches Total Spend on the 30d view', async () => {
       const m = await getCostMetrics('30d')
-      expect(m.budgetBurnPct).toBeGreaterThanOrEqual(0)
-      expect(m.budgetBurnPct).toBeLessThanOrEqual(100)
+      expect(m.budgetUsd).toBeGreaterThan(0)
+      expect(m.spentUsd).toBeGreaterThan(0)
+      // 30d projection factor is 1, so the gauge's spend equals the Total Spend KPI.
+      expect(m.spentUsd).toBeCloseTo(m.kpis.totalSpend.value, 5)
     })
 
     it('costPerMergedPrByTaskType covers all 6 task types', async () => {

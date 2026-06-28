@@ -308,7 +308,8 @@ interface OutcomesMetrics {
 interface CostMetrics {
   kpis: Record<'totalSpend' | 'costPerTask' | 'costPerMergedPr' | 'tokenWastePct', Kpi>
   spendTrend: TrendPoint[]
-  budgetBurnPct: number                  // drives the radial gauge; red > 90%
+  spentUsd: number                       // 30-day-projected spend; drives the radial gauge (red > 90%)
+  budgetUsd: number                      // monthly budget (single source of truth)
   costPerMergedPrByTaskType: Array<{ taskType: TaskType; costUsd: number }>
   teamBreakdown: TeamMetrics[]
 }

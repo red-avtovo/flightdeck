@@ -159,7 +159,9 @@ export interface OutcomesMetrics {
 export interface CostMetrics {
   kpis: Record<'totalSpend' | 'costPerTask' | 'costPerMergedPr' | 'tokenWastePct', Kpi>
   spendTrend: TrendPoint[]
-  budgetBurnPct: number
+  /** Spend projected to a 30-day month, and the monthly budget — for the budget gauge. */
+  spentUsd: number
+  budgetUsd: number
   costPerMergedPrByTaskType: Array<{ taskType: TaskType; costUsd: number }>
   teamBreakdown: TeamMetrics[]
 }

@@ -9,8 +9,6 @@ import { Skeleton } from '../components/ui/Skeleton'
 import { formatCurrency, formatPercent } from '../lib/utils'
 import type { TeamMetrics } from '../types'
 
-const MONTHLY_BUDGET_USD = 8_000
-
 function TeamCostSummary({ rows }: { rows: TeamMetrics[] }) {
   const thClass = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-400'
   const tdClass = 'px-3 py-2 text-sm text-slate-300 whitespace-nowrap'
@@ -63,8 +61,8 @@ export default function CostPage() {
     )
   }
 
-  const { kpis, spendTrend, budgetBurnPct, costPerMergedPrByTaskType, teamBreakdown } = data
-  const spentUsd = (budgetBurnPct / 100) * MONTHLY_BUDGET_USD
+  const { kpis, spendTrend, spentUsd, budgetUsd, costPerMergedPrByTaskType, teamBreakdown } = data
+  const remainingUsd = Math.max(0, budgetUsd - spentUsd)
 
   const costByType = costPerMergedPrByTaskType
     .filter(d => d.costUsd > 0)
@@ -94,10 +92,27 @@ export default function CostPage() {
           <AreaChart data={spendTrend} dataKey="value" formatY={formatCurrency} />
         </div>
 
-        <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 flex flex-col items-center">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-4 self-start">Monthly budget</h2>
-          <BudgetGauge spentUsd={spentUsd} budgetUsd={MONTHLY_BUDGET_USD} />
-          <p className="mt-2 text-xs text-slate-400">{formatCurrency(spentUsd)} of {formatCurrency(MONTHLY_BUDGET_USD)}</p>
+        <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6 flex flex-col">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-slate-400">Monthly budget</h2>
+          {/* Center the gauge in the card so it doesn't float in a sea of empty space when
+              this card is stretched to match the taller spend chart beside it. */}
+          <div className="flex flex-1 flex-col items-center justify-center py-4">
+            <BudgetGauge spentUsd={spentUsd} budgetUsd={budgetUsd} />
+            <p className="mt-2 text-sm text-slate-300 tabular-nums">
+              {formatCurrency(spentUsd)} <span className="text-slate-500">of {formatCurrency(budgetUsd)}</span>
+            </p>
+          </div>
+          {/* Footer stats fill the lower half and add at-a-glance context. */}
+          <dl className="grid grid-cols-2 gap-3 border-t border-slate-700 pt-4 text-center">
+            <div>
+              <dt className="text-xs text-slate-400">Remaining</dt>
+              <dd className="text-sm font-semibold tabular-nums text-slate-100">{formatCurrency(remainingUsd)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400">Projected (30d)</dt>
+              <dd className="text-sm font-semibold tabular-nums text-slate-100">{formatCurrency(spentUsd)}</dd>
+            </div>
+          </dl>
         </div>
       </div>
 
