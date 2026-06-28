@@ -44,3 +44,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Claude Code: keep shared skills/settings, ignore machine-local settings
+.claude/settings.local.json
+.claude/skills/*-workspace/
