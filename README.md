@@ -14,6 +14,7 @@ activity count. That framing is what separates Flightdeck from generic LLM
 observability dashboards.
 
 🔗 **Live demo:** https://red-avtovo.github.io/flightdeck/
+
 📚 **Storybook:** https://red-avtovo.github.io/flightdeck/storybook/
 
 > This is a **front-end demo** running entirely on deterministic mock data — there
